@@ -1,0 +1,553 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+	<META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=utf-8">
+	<TITLE></TITLE>
+	<META NAME="GENERATOR" CONTENT="LibreOffice 3.5  (Linux)">
+	<META NAME="AUTHOR" CONTENT="Joaquín Navarro">
+	<META NAME="CREATED" CONTENT="20131206;18444300">
+	<META NAME="CHANGEDBY" CONTENT="root ">
+	<META NAME="CHANGED" CONTENT="20131210;11321100">
+	<STYLE TYPE="text/css">
+	<!--
+		@page { margin: 2cm }
+		P { margin-bottom: 0.21cm }
+		PRE.cjk { font-family: "WenQuanYi Micro Hei", monospace }
+		PRE.ctl { font-family: "Lohit Hindi", monospace }
+		A.cjk:link { so-language: zxx }
+		A.ctl:link { so-language: zxx }
+	-->
+	</STYLE>
+</HEAD>
+<BODY LANG="en-US" DIR="LTR">
+<DIV TYPE=HEADER>
+	<P ALIGN=RIGHT STYLE="margin-bottom: 0.5cm">TopoDelProp</P>
+</DIV>
+<P ALIGN=CENTER STYLE="margin-bottom: 0cm; text-decoration: none"><FONT SIZE=3 STYLE="font-size: 13pt"><B><FONT FACE="Monospace">TopoDelProp.Tool
+for managing geographic data and </FONT><FONT COLOR="#3c3c3c"><FONT FACE="Monospace">metadata</FONT></FONT><FONT FACE="Monospace">
+to support a legal </FONT><FONT COLOR="#3c3c3c"><FONT FACE="Monospace">cadastre</FONT></FONT><FONT FACE="Monospace">.
+Valid for every country.</FONT></B></FONT></P>
+<P ALIGN=CENTER STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P ALIGN=CENTER STYLE="margin-bottom: 0cm"><B>Empty database creation
+instructions in Windos and Linux systems</B></P>
+<P ALIGN=CENTER STYLE="margin-bottom: 0cm"><BR>
+</P>
+<PRE CLASS="western" STYLE="font-weight: normal; text-align: center">J. Gaspar Mora Navarro
+<SPAN LANG="en-US">Dep. de Ing. Cartográfica, Geodesia y Fotogrametría</SPAN>
+<SPAN LANG="en-US">Escuela de Ing. Geodésica, Cartográfica y Topográfica</SPAN>
+<SPAN LANG="en-US">Universidad Politécnica de Valencia</SPAN>
+<SPAN LANG="en-US">topodelprop@gmail.com</SPAN></PRE><P STYLE="margin-bottom: 0cm">
+You can to try a system justification and the program manual in the
+thesis document</P>
+<P STYLE="margin-bottom: 0cm">http://riunet.upv.es/handle/10251/321/browse?authority=27239&amp;type=author
+</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm">In the thesis docuement you'll finde a
+detailed description from the instalation in Windows from TopoDelProp
+plugin and from the usuary manage program TopoDelPropUsuarios.py</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm"><IMG SRC="index-en_html_ma6091a4.jpg" NAME="gráficos3" ALIGN=LEFT WIDTH=643 HEIGHT=354 BORDER=0><BR>
+</P>
+<P STYLE="margin-bottom: 0cm">Probably you want to test the program
+quickly and see if you are intresting in his studio or not. For that
+I recomend you that you install the plugin and configure it. That can
+bring you abbout 5 minutes. Later test it.  You can access, as a
+'editor1' or 'consultor_autorizado1',  to the test database instaled
+in 158.42.199.31 IP. Passwords are the same then user names. Test the
+plugin and, if you are interesed in to have your own database, then
+follow with the next instructions.</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm">The data connection are:</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm">	host: 158.42.199.31</P>
+<P STYLE="margin-bottom: 0cm">	port: 5432</P>
+<P STYLE="margin-bottom: 0cm">	database: propiedad 
+</P>
+<P STYLE="margin-bottom: 0cm">	user: consultor_autorizado1</P>
+<P STYLE="margin-bottom: 0cm">	password: consultor_autorizado1</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm">The Internet access to server is slow.
+If you wish, you can to install a database with 80 topographic
+academic works in your computer. For it you have to have instaled 
+PostgreSQL 9.1, 9.2 o 9.3 + PostGIS 2 o 2.1. Download de database
+file copy and restore it in your computer. It's easy.</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm">The instructions and database file are
+in one entry in the blog http://planosypropiedad.com.</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm">I say you that the program isn't easy
+tool because it try to solve a complex problem: mange the topographic
+data and metadata in the same database. Automatic process in the
+database informs you  if the geometry of the data are correct or not.
+Also you can send and retrieve documents like: plans, dwg, imagens, …
+The manual have abbout 100 pages, in spanish.</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm"><B>Plugin instalation</B></P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm">You need to do two steps:</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<UL>
+	<LI><P STYLE="margin-bottom: 0cm">Install QGIS 2. In Windows I
+	recommend you to install the program in <A CLASS="western" HREF="/C:/">C:/</A>.
+	For example in <A CLASS="western" HREF="/C:/Qgis20">C:/Qgis20</A>
+	directory.</P>
+	<LI><P STYLE="margin-bottom: 0cm">Install the plugin. You need to do
+	two steps:</P>
+	<UL>
+		<LI><P STYLE="margin-bottom: 0cm"><SPAN LANG="en-US">Copy the
+		plugin directories in </SPAN><A CLASS="western" HREF="/C:/Qgs20/apps/qgis/python/plugins"><SPAN LANG="en-US">C:/Qgs20/apps/qgis/python/plugins</SPAN></A><SPAN LANG="en-US">,
+		in Windows case. For     Linux, copy the directories in
+		/home/usuario/.qgis2/python/plugins (for to see the .qgis2
+		directory probably you need to press CTRL+H). The fist directory is
+		a library, that can be copyed in everywhere in path from Qgis
+		Python. The second directory is the plugin.</SPAN></P>
+	</UL>
+	<P STYLE="margin-bottom: 0cm"></P>
+</UL>
+<P STYLE="margin-bottom: 0cm">For the QGIS plugin works, there are to
+make a archive called dirTrabajos.txt. His position is obliged. In
+Windos have to be in <A CLASS="western" HREF="/c:/">c:/</A> directly.
+In Linux in \home\user. The file content is two lines:</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<UL>
+	<LI><P STYLE="margin-bottom: 0cm">The first line says the directory
+	where the plugin will load and will upload the files: topographic
+	memory, images, etc. This prevents too many downloads from the
+	database. You have to make that directory and make you sure you have
+	write permission.</P>
+	<LI><P STYLE="margin-bottom: 0cm">The second line says the path and
+	name of the program with it will show the PDF files, 
+	</P>
+	<P STYLE="margin-bottom: 0cm"></P>
+</UL>
+<P STYLE="margin-bottom: 0cm">In Windows, the content of the file can
+be (see in the two - - of the end, they are necessary):</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm">c:/delProp-- 
+</P>
+<P STYLE="margin-bottom: 0cm">C:/Program Files (x86)/Adobe/Reader
+9.0/Reader/AcroRd32.exe--</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm">In Linux, the file content can be:</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm">/home/usuario/delProp--</P>
+<P STYLE="margin-bottom: 0cm">evince--</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm"><B>Other plugin documents</B></P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm; font-weight: normal">Inside TopoDelProp
+instalation directory, you will find an other directory named
+documentos, 
+</P>
+<P STYLE="margin-bottom: 0cm; font-weight: normal">Si examina el
+directorio de instalación del plugin TopoDelProp, encontrará una
+carpeta, inside that directory there are some other directories of
+interest:</P>
+<P STYLE="margin-bottom: 0cm; font-weight: normal"><BR>
+</P>
+<UL>
+	<LI><P STYLE="margin-bottom: 0cm; font-weight: normal">BaseDatosEjemplo:
+	Has instructions for restore a database for can text the system. You
+	can download the text file database from a article of
+	<A CLASS="western" HREF="http://planosypropiedad.com/">http://planosypropiedad.com</A>
+	blog.</P>
+	<LI><P STYLE="margin-bottom: 0cm; font-weight: normal">cbd: contiene
+	ficheros con código SQL que hay que ejecutar para restaurar la base
+	de datos de ejemplo, o en el caso de que se desee crear una base de
+	datos vacía y comenzar desde cero.</P>
+	<LI><P STYLE="margin-bottom: 0cm; font-weight: normal">GestionUsuarios:
+	contiene una aplicación Python para facilitar la gestión de
+	usuarios de la base de datos</P>
+</UL>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P LANG="en" ALIGN=CENTER STYLE="margin-bottom: 0cm; font-style: normal"><A NAME="result_box"></A>
+<B>CREATING A DATABASE EMPTY IN ANY REFERENCE SYSTEM TO WORK WITH
+TOPODELPROP</B></P>
+<P ALIGN=CENTER STYLE="margin-bottom: 0cm; font-style: normal"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm">These instructions are more current
+then the thesis document instructions.</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm">The difference for the creation of the
+database between Windows an  Linux system, it's only in the path from
+code SQL files that necessary to execute. Unafortunately, the paths
+to files have to be absolutely. For modify the less as possible the
+paths I propose:</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<UL>
+	<LI><P STYLE="margin-bottom: 0cm">In Linux copy the <I>cbd
+	</I><SPAN STYLE="font-style: normal">directory, who has all files to
+	execute, in /home. That shape the paths will be the same, an you
+	don't need modify anything.</SPAN></P>
+	<LI><P STYLE="margin-bottom: 0cm"><SPAN LANG="en-US"><SPAN STYLE="font-style: normal">In
+	Windows, I recommend to make the </SPAN></SPAN><A CLASS="western" HREF="/c:/delProp"><SPAN LANG="en-US"><SPAN STYLE="font-style: normal">c:/delProp</SPAN></SPAN></A><SPAN LANG="en-US"><SPAN STYLE="font-style: normal">
+	directory and to copy there the </SPAN></SPAN><SPAN LANG="en-US"><I>cbd</I></SPAN><SPAN LANG="en-US"><SPAN STYLE="font-style: normal">
+	folder, but you will have to change the paths, file to file,
+	changing /home/ for c:/delProp/</SPAN></SPAN></P>
+</UL>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<OL>
+	<LI><P STYLE="margin-bottom: 0cm"><B>Make the 'propiedad' database
+	(you can use every other name).</B></P>
+</OL>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm">Windows: createdb -U usuario -E UTF8
+propiedad 
+</P>
+<P STYLE="margin-bottom: 0cm">Linux: createdb -E UTF8 propiedad</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm">The difference betwin Windows and
+Linux, using PostgreSQL, is that in Linux you need to use the same
+user from Linux an PostgreSQL. Is for that you don't need to specific
+user and password every time in Linux for use psql program.</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<OL START=2>
+	<LI><P STYLE="margin-bottom: 0cm"><B>Inside database, make the
+	PostGIS extension. You need postgis 2, or 2.1</B></P>
+	<P STYLE="margin-bottom: 0cm"></P>
+</OL>
+<P STYLE="margin-bottom: 0cm">In a console window:</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm">Windows: psql -U usuario -d propiedad
+-W</P>
+<P STYLE="margin-bottom: 0cm">Linux: psql propiedad</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm">create extension postgis; 
+</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<OL START=3>
+	<LI><P STYLE="margin-bottom: 0cm"><B>Create the users for start:
+	admin_propiedad1, editor1, consultor1, consultor_autorizado1. The
+	passwords for this users is his own name.</B></P>
+</OL>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm">A partir de ahora hay que ejecutar
+archivos .txt que contienen código SQL en la base de datos</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm">Los archivos se ejecutan desde dentro
+de la base de datos propiedad con 
+</P>
+<P STYLE="margin-bottom: 0cm">\i
+\ruta_absoluta\nombrearchivo.extension</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm">Es por esto que es conveniente copiar
+la carpeta cbd en \home, de esta forma 
+</P>
+<P STYLE="margin-bottom: 0cm">las rutas no hay que cambiarlas dentro
+de los archivos. Para hacerlo tendrá que actuar como</P>
+<P STYLE="margin-bottom: 0cm">administrador. Luego, también como
+administrador, tendrá que conceder permisos sobre el directorio a
+todos los usuarios para que psql tenga acceso a ellos.</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm"><IMG SRC="index-en_html_m9eb12b1.png" NAME="gráficos1" ALIGN=LEFT WIDTH=337 HEIGHT=414 BORDER=0><BR>
+</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm">Puede eliminar estos usuarios y crear
+nuevos, manualmente o con la aplicación 
+</P>
+<P STYLE="margin-bottom: 0cm">UPVDelPropUsuarios.py. Encontrará la
+forma de instalación y manual en el documento</P>
+<P STYLE="margin-bottom: 0cm">de tesis</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm">Los usuarios de partida se crean
+ejecutando</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm">\i /home/cbd/001_creaUsuarios.txt 
+</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<OL START=4>
+	<LI><P STYLE="margin-bottom: 0cm"><B>Crear las tablas comunes para
+	todos los esquemas espaciales</B></P>
+	<P STYLE="margin-bottom: 0cm"></P>
+</OL>
+<P STYLE="margin-bottom: 0cm">Antes de ejecutar este script localice
+los ficheros de texto provincias.txt y municipios.txt,  en el
+directorio /home/cbd/v2/def, y sustituya las provincias y municipios
+españoles por los de su país.</P>
+<P STYLE="margin-bottom: 0cm">Guarde el fichero con codificación
+UTF8.</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm">Ejecute el fichero:</P>
+<P STYLE="margin-bottom: 0cm">\i /home/cbd/comun/001_creaComun.txt</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<OL START=5>
+	<LI><P STYLE="margin-bottom: 0cm"><B>Conceder permisos a los
+	usuarios sobre las tablas comunes </B>
+	</P>
+</OL>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm">\i
+/home/cbd/comun/004_permisosComun.txt</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<OL START=6>
+	<LI><P STYLE="margin-bottom: 0cm"><B>Crear tablas espaciales</B></P>
+	<P STYLE="margin-bottom: 0cm"></P>
+</OL>
+<P STYLE="margin-bottom: 0cm">En este caso, se proporcionan archivos
+de texto que generan las tablas espaciales</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm">para el src 25830 (código
+EPSG para el sistema ETRS89, UTM, huso 30)</P>
+<P STYLE="margin-bottom: 0cm">Para cambiar el sistema, solo debe
+acceder a los archivos y sustituir el texto 25830 del archivo por su
+código EPSG.</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm">El archivo proporcionado, que llama a
+otros archivos es</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm">/home/cbd/src25830/001_crea25830.txt</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm">Este archivo ejecuta otros tres</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm">/home/cbd/v2/def/3src25830.txt 
+</P>
+<P STYLE="margin-bottom: 0cm">/home/cbd/v2/edicion/3edSrc25830.txt 
+</P>
+<P STYLE="margin-bottom: 0cm">/home/cbd/script/fdisparadoras/crea_disparadores_25830.txt</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm">Debe acceder a los cuatro archivos y
+sustituir el texto 25830 del archivo por su código EPSG</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm">Luego solo debe ejecutar el primero,
+que a su vez, ejecuta el resto.</P>
+<P STYLE="margin-bottom: 0cm">\i /home/cbd/src25830/001_crea25830.txt</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm">Ahora se necesita conceder permiso a
+los usuarios sobre  los nuevos objetos de la base de datos, para ello
+acceda al archivo</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm">/home/cbd/src25830/004_permisos25830.txt</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm">y sustituya el texto 25830 por su nuevo
+código EPSG y ejecútelo en la base de datos</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm">\i
+/home/cbd/src25830/004_permisos25830.txt</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm">Este es el proceso para crear un SRC
+nuevo. Si necesita más SRCs para cubrir más territorio solo debe
+duplicar los cinco archivos y sustituir el viejo texto SRC por e
+nuevo, ejecutando después solo dos de ellos: 001_creaXXXXX.txt y
+004_permisosXXXXX.txt</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm">Le aconsejo la siguiente estrategia:</P>
+<UL>
+	<LI><P STYLE="margin-bottom: 0cm">Realice una copia de la carpeta
+	original /home/cbd/src25830</P>
+	<LI><P STYLE="margin-bottom: 0cm">Renómbrela a /home/cbd/srcXXXXX</P>
+	<LI><P STYLE="margin-bottom: 0cm">Renombre sus archivos
+	001_crea25830.txt y 004_permisos25830.txt a 001_creaXXXXX.txt y
+	004_permisosXXXXX.txt</P>
+	<LI><P STYLE="margin-bottom: 0cm">Acceda a los archivos renombrados
+	y sustituya 25830 por su nuevo código XXXXX</P>
+	<LI><P STYLE="margin-bottom: 0cm">Realice ahora una copia de los
+	archivos originales, en las mismas carpetas donde se encuentran</P>
+	<UL>
+		<LI><P STYLE="margin-bottom: 0cm">/home/cbd/v2/def/3src25830.txt 
+		</P>
+		<LI><P STYLE="margin-bottom: 0cm">/home/cbd/v2/edicion/3edSrc25830.txt
+				</P>
+		<LI><P STYLE="margin-bottom: 0cm">/home/cbd/script/fdisparadoras/crea_disparadores_25830.txt</P>
+	</UL>
+	<LI><P STYLE="margin-bottom: 0cm">Renombre estos archivos a</P>
+	<UL>
+		<LI><P STYLE="margin-bottom: 0cm">/home/cbd/v2/def/3srcXXXXX.txt</P>
+		<LI><P STYLE="margin-bottom: 0cm">/home/cbd/v2/edicion/3edSrcXXXXX.txt</P>
+		<LI><P STYLE="margin-bottom: 0cm">/home/cbd/script/fdisparadoras/crea_disparadores_XXXXX.txt</P>
+	</UL>
+	<LI><P STYLE="margin-bottom: 0cm">Ejecute los archivos</P>
+</UL>
+<UL>
+	<UL>
+		<LI><P STYLE="margin-bottom: 0cm">\i
+		/home/cbd/src25830/001_creaXXXXX.txt</P>
+		<LI><P STYLE="margin-bottom: 0cm">\i
+		/home/cbd/src25830/004_permisosXXXXX.txt</P>
+	</UL>
+</UL>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm">Puede repetir el proceso con todos los
+SRC que necesite. Se crean las tablas espaciales, se conceden los
+permisos a los usuarios, y se añaden los procedimientos automáticos
+de la base de datos. 
+</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<OL START=7>
+	<LI><P STYLE="margin-bottom: 0cm"><B>Configuración del plugin
+	TopoDelProp</B></P>
+</OL>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm">Para poder utilizar los nuevos SRC
+creados desde el plugin TopoDelProp, queda un último detalle. Hay
+que añadir los textos de los nuevos SRC a la lista de SRC del
+programa. Para ello únicamente hay que añadirlos a la tabla de la
+base de datos dom.src_trabajo (esquema dom, tabla src_trabajo). Añada
+solo el número del src en la columna src_trabajo. Si tiene cinco
+SRCs creados, deberá tener cinco filas en esta tabla.</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm"><IMG SRC="index-en_html_m6ab6a0c5.png" NAME="gráficos2" ALIGN=LEFT WIDTH=396 HEIGHT=234 BORDER=0><BR>
+</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<DIV TYPE=FOOTER>
+	<P ALIGN=RIGHT STYLE="margin-top: 0.5cm; margin-bottom: 0cm">Joaquín
+	Gaspar Mora Navarro</P>
+</DIV>
+</BODY>
+</HTML>

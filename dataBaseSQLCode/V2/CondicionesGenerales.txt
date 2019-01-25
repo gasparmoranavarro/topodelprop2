@@ -1,0 +1,26 @@
+* El directorio para los trabajos no debe tener acentos, espacios o eñes.
+* Los nombres de las tablas y los campos tampoco deben tener acentos espacios o eñes.
+* Si hay un campo bytea en una tabla debe llamarse 'archivo', y debe tener otro
+campo para almacenar el nombre del achivo. Debe llamarse 'nom_arch'.
+* Si el src del trabajo es A, debe haber un esquema que se llame srcA. El programa
+introducirá ahí las tablas con datos espaciales.
+* Salvo las tablas del esquema dom, todas las demás debe tener un campo clave denominado:
+	- Para la tabla trabajos: id_trabajo.
+	- Para las tablas espaciales: gid
+	- Para el resto de tablas: id
+* Todas las tablas, salvo las del esquema 'dom' deben tener un campo denominado id_trabajo,
+que referencia al campo id_trabajo de la tabla trabajos.
+
+--Hay que cambiar las variables siguientes de postgresql.conf
+--	statement_timeout=60000 #Si la sentencia tarda mas de 1 minuto en acabar,
+--				#se aborta. El tiempo solo cuenta trabajo del servidor.
+	bytea_output=escape #Necesario para que los archivos se recuperen bien desde python.
+--
+--	#datestyle = 'iso, dmy'
+--	datestyle = 'European'#cambia a nuestro formato de fecha
+
+-- Al insertar datos, los nombres de imágenes de los lindes y el id_linde deben
+-- ´	ser únicos, es decir, el mismo linde no puede tener dos veces el mismo nombre
+--	de imagen. lo mismo ocurre con los elementos interiores, el nombre de la imagen
+-- 	no puede repetirse para el mismo id del elemento interior
+-- 

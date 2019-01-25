@@ -1,0 +1,46 @@
+begin;
+
+CREATE OR REPLACE FUNCTION script.stx_extract(geometry,integer) RETURNS geometry AS $$
+/*
+Esta funcion procede del libro PostGIS 2. Análisis espacial avanzado. Autor Jose Carlos
+Martinez Llario. ISBN-13: 978-84-615-8833-6. Pagina 125.
+El primer parámetro es una geometria que puede ser POINT, LINESTRING, POLYGON, MULTILINESTRING,MULTIPOLYGON o GEOMETRYCOLLECTION.
+El segundo parámetro es la dimensión de la geometría que debe retornar.(0: MultiPoint, 1: MultiLinestring, 2: MultiPolygon).
+Siempre devuelve una geometria multi o null. Devuelve null si no hay geometrías de la 
+dimension especificada en la geometría de entrada.
+Esta función está pensada para extraer de las geometrías geometrycollection un único tipo
+de geometría, o null, si no hay.
+*/
+DECLARE
+	geom alias for $1;
+	dimension alias for $2;
+	out geometry;
+	tipo varchar;
+BEGIN
+	tipo:=geometrytype(geom);
+	if (tipo='LINESTRING') THEN
+		if dimension <> 1 then return null;
+		else
+			return st_multi(geom);
+		end if;
+	elsif (tipo='POINT') then
+		if dimension <> 0 then return null;
+		else
+			return st_multi(geom);
+		end if;
+	elsif (tipo='POLYGON') then
+		if dimension <> 2 then return null;
+		else
+			return st_multi(geom);
+		end if;
+	end if;
+
+	out:=st_collectionExtract(geom,dimension + 1);
+	if (st_isempty(out)) then
+		return null;
+	end if;
+	return st_multi(out);
+END;
+$$ LANGUAGE 'plpgsql';
+
+commit;

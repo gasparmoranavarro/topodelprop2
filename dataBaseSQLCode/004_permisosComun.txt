@@ -1,0 +1,92 @@
+begin;
+
+-- Ejecutar desde psql en la base de datos bdtop
+-- Entrar en psql como superusuario en una base de datos y escribir \i archivo
+--                archivo: ruta y nombre a este archivo.
+
+--NOTAS
+--El rol PUBLIC se refiere a todos los roles, los permisos de public
+--son heredados por todos los roles.
+--Por defecto el rol PUBLIC tiene permiso de casi todo en el esquema PUBLIC. por eso
+--le revoco todos los permisos en ese esquema.
+--IMPORTANTE: si no se da permiso login a los usuarios no se podran conectar.
+--IMPORTANTE: si no se concede permiso USAGE sobre un esquema, por mucho que se concedan
+--		permisos sobre sus tablas, no se podra acceder a ellas.
+
+--tipos de usuario:
+	--consultor: solo lee capas de geometria, en el nivel definitivo exclusivamente.
+		--puede hacerlo a través de qgis. No tiene que estar en la tabla
+		--comun usuarios
+	--consultor_autorizado:lee toda la informacion del nivel definitivo, nada del de edic.
+	--editor:puede escribir en el nivel de edicion, leer y modificar solo sus trabajos
+		--del nivel de edicion, y leer las capas de geometria del nivel definitivo.
+	--admin_propiedad:puede leer y modificar todos los niveles, y crear usuarios para
+		--la base de datos propiedad
+--revoke all on database postgres from PUBLIC;
+--revoke all on database template_postgis_20 from PUBLIC;
+--revoke all on database postgis from PUBLIC;
+
+--esquema public
+revoke all on schema public from public;
+grant usage on schema public,script to editor,admin_propiedad,consultor,consultor_autorizado;
+
+--NUEVO
+--para poder ver las columnas con geometría
+grant select on geometry_columns to editor, consultor, admin_propiedad, consultor_autorizado;
+grant select on comun.trabajos to editor; --para que puedan ver los trabajos de un municipio
+									-- si no no pueden cargar las capas definitivas
+
+--FIN NUEVO
+grant select,insert,delete,update on all tables in schema public to editor,admin_propiedad;
+grant select on all tables in schema public to consultor,consultor_autorizado;
+
+
+
+--para que puedan utilizar las funciones
+--grant usage on schema public to admin_propiedad,editor,consultor,consultor_autorizado;
+
+--permiso para conectar con los esquemas
+grant usage on schema ed_comun, dom,comun to editor,admin_propiedad;
+grant usage on schema dom,comun to consultor_autorizado;
+
+--permisos sobre las tablas:
+	--Solo lectura sobre las capas definitivas con geometrias
+		-- para consultor y editor
+
+grant select on comun.trabajos to consultor,editor;--necesario para que puedan hacer una consulta por municipio del 
+				--trabajo y poder cargar las capas solo con los elementos espaciales del municipio.
+--								no hay datos personales
+
+	--solo lectura a todos en las tablas de dom, ya que la aplicacion
+		--carga los dominios si es editor o admin_propiedad
+grant select on all tables in schema dom to editor;
+--Tambien los carga si es consultor_autorizado, ya que es necesario para elegir el municipio
+grant select on all tables in schema dom to consultor_autorizado;
+
+
+	--solo lectura sobre todas las tablas definitivas a consultor_autorizado
+grant select on all tables in schema comun to consultor_autorizado;
+grant select on dom.config to consultor_autorizado;
+grant select on dom.fecha_dom to consultor_autorizado;
+
+	--permiso lectura-escritura para editor-administrador en las capas de edicion
+grant select,insert,update,delete on all tables in schema ed_comun to editor,admin_propiedad;
+
+	--permiso de lectura-escritura solo al administrador en todas las capas definitivas
+grant select,insert,delete,update on all tables in schema comun to admin_propiedad;
+grant select,insert,delete,update on all tables in schema dom to admin_propiedad;
+
+	--permiso para conceder permisos a otros usuarios a admin_propiedad
+grant select on all tables in schema dom to admin_propiedad with grant option;
+
+
+
+
+--PARA AÑADIR ADMINISTRADORES. EN PSQL--
+--create user NUEVO_ADMIN with encrypted password 'XXXXX' createrole createuser login;
+--grant consultor_autorizado to NUEVO_ADMIN;
+--añadir sus datos de usuario a mano en la tabla comun.usuarios, para que pueda usar la
+--	aplicación
+
+
+commit;

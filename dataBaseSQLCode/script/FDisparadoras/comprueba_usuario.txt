@@ -1,0 +1,27 @@
+begin;
+
+CREATE OR REPLACE FUNCTION script.comprueba_usuario() RETURNS trigger AS $$
+	/*
+
+	Autor: Gaspar Mora Navarro. Universidad Politécnica de Valencia.
+
+    Este disparador se ejecuta antes de actualizar un usuario en la tabla comun.usuarios.
+    Si se ha cambiado el campo usuario se impedirá la actualización, ya que entonces no       coincidirá con el usuario de postgres. Para cambiar un usuario hay que borrarlo y crearlo
+    de nuevo con la aplicación de gestionar usuarios.
+
+	*/
+
+  DECLARE
+
+  BEGIN
+
+	if NEW.usuario <> OLD.usuario then
+		raise exception 'No puede cambiar el campo usuario. Para hacerlo debe borrar el usuario y crearlo con la aplicacion de gestionar usuarios';
+	else
+		return NEW;
+	end if;
+
+  END;
+$$ LANGUAGE 'plpgsql';
+
+commit;

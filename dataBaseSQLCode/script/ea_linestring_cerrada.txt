@@ -1,0 +1,97 @@
+begin;
+
+CREATE OR REPLACE FUNCTION script.ea_linestring_cerrada(geom geometry, e_max double precision) RETURNS double precision AS $$
+
+/*Autor: Gaspar Mora Navarro. Universidad Politécnica de Valecncia.
+Calcula el error en el area en funcion de la precision de los puntos del perimetro.
+La precision es la misma en todos los puntos, y la misma en X e Y.
+Se puede aplicar a polígonos unicamente, no a multipoligonos.
+resuelve la formula: 
+	error=raizCuadrada((1/4)*e_max^2*Sumatorio de 1 a n de(sumX+sumY))
+	sumX=((v_y[i+1]-v_y[i-1]))^2
+	sumY=((v_x[i-1]-v_x[i+1]))^2
+	n=numero de vertices del contorno del poligono, sin incluir el ultimo, que esta repetido.
+
+La formula anterior se obtiene de derivar respecto la x y la y la formula del calculo de area de 
+un poligono a partir de las coordenadas de sus vertices 
+	S=1/2*sumatorio de 1 a n((Xi*Yi+1-Xi+1-Yi))
+Parametros:
+
+geom: geometria. Exclusivamente linestring con el contorno, repitiendo el punto inicial al final del linestring.
+e_max: precision en x e y de los puntos del contorno.
+
+Return: double precision si todo va bien, si la geometria no es poligon o tiene rings genera un error.
+
+*/
+  DECLARE
+	registro record;
+	punto geometry;
+	v_x double precision[];
+	v_y double precision[];
+	x double precision;
+	y double precision;
+	suma double precision;
+	n integer;
+	i integer;
+	ep double precision;
+	tipo_geom varchar;
+	sumandoX double precision;
+	sumandoY double precision;
+	n_rings integer;
+  BEGIN
+	tipo_geom:=ST_GeometryType(geom);
+
+	if tipo_geom <> 'ST_LineString' then
+		raise exception 'La funcion ea_linestring_cerrada solo es aplicable a linestrings cerradas';
+	end if;
+	/*
+	n_rings:=st_NumInteriorRings(geom);
+	if n_rings > 0 then
+		raise exception 'El poligono tiene % rings. No debe tener rings',n_rings;
+	end if;
+	*/
+	if not(st_equals(st_startpoint(geom),st_endpoint(geom))) then
+		raise exception 'El punto inicial y final del linestring deben ser el mismo';
+	end if;
+
+	v_x:=array[]::double precision[];
+	v_y:=array[]::double precision[];
+
+	--obtengo las corrdenadas del perimetro y las grabo en un vector para poder usar indices
+	--el ultimo punto del vector es igual que el primero
+        for registro in select (st_dumppoints(geom)).geom as geom loop
+		--raise notice 'Tipo elemento %',ST_GeometryType(registro.geom);
+		x:=st_x(registro.geom);
+		y:=st_y(registro.geom);
+		v_x:=array_append(v_x,x);
+		v_y:=array_append(v_y,y);
+        end loop;
+	--añado el penultimo punto del poligono como el primer punto de la lista de puntos
+	--asi comienza por el funto final y acaba con el punto del principio
+	--original v_x son las x de P1,P2,P3,P4,P1
+	--final    v_x son las x de P4,P1,P2,P3,P4,P1
+
+	n:=array_length(v_x,1);--numero de puntos
+	x=v_x[n-1];
+	y=v_y[n-1];
+	v_x:=array_prepend(x,v_x);
+	v_y:=array_prepend(y,v_y);
+
+	suma:=0;
+	--si el poligono tenia 5 puntos, repitiendo el primero al final, ahora se repite el penultimo
+	--al principio, luego hay 6 en total. Se debe ejecutar el algoritmo de 2 a 5.
+	FOR i in 2..n BY 1 LOOP--desde el segundo hasta el penultimo
+		--raise notice 'x-1: % x:% x+1:%',v_x[i-1],v_x[i],v_x[i+1];
+		--raise notice 'y-1: % y:% y+1:%',v_y[i-1],v_y[i],v_y[i+1];
+		sumandoX:=pow((v_y[i+1]-v_y[i-1]),2);
+		sumandoY:=pow((v_x[i-1]-v_x[i+1]),2);
+		suma:=suma+sumandoX+sumandoY;
+		--raise notice 'n: %, i: %, sumaX: %, sumaY % ',n,i,sumandoX,sumandoY;
+	END LOOP;
+	ep:=suma*pow(e_max,2)/4;
+	ep:=pow(ep,0.5);
+	return ep;
+  END;
+$$ LANGUAGE 'plpgsql';
+
+commit;

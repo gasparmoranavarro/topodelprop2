@@ -1,0 +1,38 @@
+begin;
+
+CREATE OR REPLACE FUNCTION script.error_area_multipoligono(geom geometry, e_max double precision) RETURNS double precision AS $$
+
+/*Autor: Gaspar Mora Navarro. Universidad Politécnica de Valecncia.
+Se puede aplicar a polígonos y multipoligonos.
+
+*/
+  DECLARE
+	n integer;
+	geom_linestring geometry;
+	i integer;
+	tipo_geom varchar;
+	registro record;
+	error_ring double precision;
+	error_total double precision;
+  BEGIN
+	tipo_geom:=GeometryType(geom);
+	if tipo_geom <> 'POLYGON' then
+		if tipo_geom <> 'MULTIPOLYGON' then
+			raise exception 'La funcion script.error_area_multipoligono solo es aplicable a poligonos o multipoligonos';
+		end if;
+	end if;
+	error_total:=0;
+        for registro in select (st_dump(st_boundary(geom))).geom as geom loop
+		--raise notice 'Tipo elemento %',ST_GeometryType(registro.geom);
+		if ST_GeometryType(registro.geom)='ST_LineString' then
+			error_ring:=script.ea_linestring_cerrada(registro.geom,e_max);
+			error_total= error_total + pow(error_ring,2);--sumo las varianzas
+			--raise notice 'Error parcial %',error_ring;
+		end if;
+        end loop;
+	error_total:=pow(error_total,0.5);--devuelve la desviacion tipica
+	return error_total;
+  END;
+$$ LANGUAGE 'plpgsql';
+
+commit;

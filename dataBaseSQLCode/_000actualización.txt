@@ -1,0 +1,158 @@
+--TODAS ESTAS ACTUALIZACIONES SE HAN LLEVADO A CABO EN LOS FICHEROS
+--INICIALES, POR LO QUE SI SE CREA LA BASE DE DATOS DESDE CERO, YA SE CREA
+--CON TODOS LOS CAMBIOS
+
+--la línea siguiente es para que los editores puedan cargar las capas del nivel definitivo
+--necesitan saber qué trabajos son de un municipio. 
+--Lo puse en 004_permisosComun.txt
+grant select on comun.trabajos to editor;
+
+--* v2/lindes_precision_final.txt
+--Ya introducido en los ficheros edsrc258XX.txt y src258XX.txt.
+--Es la precision final despues de todo. Lo añadí a la definición de las tablas. No hice los alter table
+--que aparecen a continuación 
+alter table ed_src25830.ed_lindes add column precision_final_cm double precision;
+update ed_src25830.ed_lindes set precision_final_cm=5;
+alter table ed_src25830.ed_lindes alter column precision_final_cm set not null;
+alter table src25830.lindes add column precision_final_cm double precision;
+update src25830.lindes set precision_final_cm=5;
+alter table src25830.lindes alter column precision_final_cm set not null;
+
+
+--* cambiar_usuarios.txt
+--Esto lo meto en el archivo de crear usuarios 003_creaUsuarios.txt para que se cambien las contraseñas
+--de los usuarios de partida y no coincidan con lo publicado
+
+--Añadir valores de campo de las parcelas afectadas
+--Introduje estos cambios en el fichero v2/def/1dom.txt:
+--parcelas_afectadas.namespace.
+create table dom.namespace(id serial primary key, namespace varchar unique);
+	insert into dom.namespace (namespace) values ('ES.DGCT.CP');
+	insert into dom.namespace (namespace) values ('ES.LOCAL.CP');
+--la línea de abajo no es necesaria
+--alter table	dom.namespace ADD CONSTRAINT unique_namespace_fincas UNIQUE (namespace);
+
+--añadir integridad referencial respecto del campo namespace a dom.namespace.
+--Lo introduje todo en parcelas_afectadas.txt y ed_parcelas_afectadas.txt
+
+--Actualizar la fecha de los dominios al cambiar el campo dom.namespace.namespace
+--lo introduje en scritpt/FDisparadoras/crea_disparadores_comun.txt
+CREATE TRIGGER actualiza_fecha_dom_namespace AFTER INSERT OR DELETE OR UPDATE ON dom.namespace FOR EACH ROW EXECUTE PROCEDURE script.actualiza_fecha_dom();
+
+--* Añadir la tabla de parcelas afectadas. La definición se encuentra en los ficheros siguientes,
+--pero no hay que ejecutarlos, ya que se añade a cada uno de los ficheros
+--3edSrc258XX.txt y 3Src258XX.txt
+v2/def/parcelas_afectadas.txt
+v2/edicion/ed_parcelas_afectadas.txt
+
+
+--Permisos sobre las tablas de las parcelas afectadas. 
+--Todo está introducido en los ficheros 004_permisos258XX.txt
+grant select on src25830.parcelas_afectadas to consultor,editor;
+
+--funcion disparadoras para que se rellenen campos de forma automática en la tabla parcelas_afectadas
+El fichero C:\delProp\cbd\script\FDisparadoras\parcelas afectadas.txt contiene la función disparadora
+La función se carga al añadir esta línea a c:/delprop/cbd/script/carga_funciones.txt
+\i c:/delprop/cbd/script/fdisparadoras/parcelas_afectadas.txt
+
+--Se crea el disparador en cada uno de los archivos 
+c:/delprop/cbd/script/fdisparadoras/crea_disparadores_258XX.txt
+
+Crear el campo 'validador' en la capa trabajos del nivel de edicion y añadir disparador para que se rellene
+con el usuario validador y se sepa quién lo ha validado. Solo al insertar.
+--añadir el usuario validador a la tabla comun.trabajos. Por defecto se pone el usuario actual. 
+--Lo introduje directamente en el fichero v2/2Comun.txt en la tabla comun.trabajos
+--no puse los alter table que aparecen a continuacion
+alter table comun.trabajos add column  usuario_validador varchar default current_user;
+alter table comun.trabajos add constraint caj_usuario_validador foreign key (usuario_validador) references comun.usuarios (usuario) on delete cascade on update cascade;
+
+--ESTO NO SE AÑADE YA QUE ESTÁ MAL DISEÑADO. 
+--HAY QUE CREAR UNA TABLA NUEVA ASOCIADA AL ELEMENTO INTERIOR QUE
+--ALMACENE LOS DATOS DE INSPIRE DEL EDIFICIO
+BEGIN;
+create table dom.condicion_construccion(id serial primary key, condicion_construccion varchar unique);
+	insert into dom.condicion_construccion (condicion_construccion) values ('functional');
+	insert into dom.condicion_construccion (condicion_construccion) values ('underConstruction');
+
+create table dom.namespace_edificio(id serial primary key, namespace_edificio varchar unique);
+	insert into dom.namespace_edificio (namespace_edificio) values ('ES.SDGC.BU');
+	insert into dom.namespace_edificio (namespace_edificio) values ('ES.LOCAL.BU');
+
+create table dom.uso_edificio(id serial primary key, uso_edificio varchar unique);
+	insert into dom.uso_edificio (uso_edificio) values ('1_residential');
+	insert into dom.uso_edificio (uso_edificio) values ('2_agriculture');
+	insert into dom.uso_edificio (uso_edificio) values ('3_industrial');
+	insert into dom.uso_edificio (uso_edificio) values ('4_commerceAndServices');
+
+CREATE TRIGGER actualiza_fecha_dom_condicion_construccion AFTER INSERT OR DELETE OR UPDATE ON dom.condicion_construccion FOR EACH ROW EXECUTE PROCEDURE script.actualiza_fecha_dom();
+CREATE TRIGGER actualiza_fecha_dom_namespace_edificio AFTER INSERT OR DELETE OR UPDATE ON dom.namespace_edificio FOR EACH ROW EXECUTE PROCEDURE script.actualiza_fecha_dom();
+CREATE TRIGGER actualiza_fecha_dom_uso_edificio AFTER INSERT OR DELETE OR UPDATE ON dom.uso_edificio FOR EACH ROW EXECUTE PROCEDURE script.actualiza_fecha_dom();
+
+--gml edificios edicion epsg 25830
+alter table ed_src25830.ed_elem_interiores add column  condicion_construccion varchar;
+alter table ed_src25830.ed_elem_interiores add column  fecha_inicio_construc timestamp;
+alter table ed_src25830.ed_elem_interiores add column  fecha_fin_construc timestamp;
+alter table ed_src25830.ed_elem_interiores add column  localid_edificio varchar;
+alter table ed_src25830.ed_elem_interiores add column  namespace_edificio varchar;
+alter table ed_src25830.ed_elem_interiores add column  uso_edificio varchar;
+alter table ed_src25830.ed_elem_interiores add column  numero_inmuebles integer;
+alter table ed_src25830.ed_elem_interiores add column  numero_viviendas integer;
+alter table ed_src25830.ed_elem_interiores add column  n_plant_sobre_ras integer;
+
+alter table ed_src25830.ed_elem_interiores add constraint caj_condicion_construccion foreign key (condicion_construccion) references dom.condicion_construccion(condicion_construccion) on delete cascade on update cascade;
+alter table ed_src25830.ed_elem_interiores add constraint caj_namespace_edificio foreign key (namespace_edificio) references dom.namespace_edificio(namespace_edificio) on delete cascade on update cascade;
+alter table ed_src25830.ed_elem_interiores add constraint caj_uso_edificio foreign key (uso_edificio) references dom.uso_edificio(uso_edificio) on delete cascade on update cascade;
+COMMIT;
+
+--condicion_construccion, fecha_inicio_construc, fecha_fin_construc, localid_edificio, namespace_edificio, uso_edificio, numero_inmuebles, numero_viviendas, n_plant_sobre_ras
+--gml edificios definitivo 25830. YA HECHO
+BEGIN;
+alter table src25830.elem_interiores add column  condicion_construccion varchar;
+alter table src25830.elem_interiores add column  fecha_inicio_construc timestamp;
+alter table src25830.elem_interiores add column  fecha_fin_construc timestamp;
+alter table src25830.elem_interiores add column  localid_edificio varchar;
+alter table src25830.elem_interiores add column  namespace_edificio varchar;
+alter table src25830.elem_interiores add column  uso_edificio varchar;
+alter table src25830.elem_interiores add column  numero_inmuebles integer;
+alter table src25830.elem_interiores add column  numero_viviendas integer;
+alter table src25830.elem_interiores add column  n_plant_sobre_ras integer;
+
+alter table src25830.elem_interiores add constraint caj_condicion_construccion foreign key (condicion_construccion) references dom.condicion_construccion(condicion_construccion) on delete cascade on update cascade;
+alter table src25830.elem_interiores add constraint caj_namespace_edificio foreign key (namespace_edificio) references dom.namespace_edificio(namespace_edificio) on delete cascade on update cascade;
+alter table src25830.elem_interiores add constraint caj_uso_edificio foreign key (uso_edificio) references dom.uso_edificio(uso_edificio) on delete cascade on update cascade;
+COMMIT;
+
+--FIN DE ESTO NO SE AÑADE YA QUE ESTÁ MAL DISEÑADO. 
+
+--DESPLAZAMIENTOS DE LA CARTOGRAFÍA CATASTRAL. ESTO SE AÑADE A 2Comun.txt y a 2edComun.txt
+--HAY QUE VOLVER A EJECUTAR PERMISOS COMUN
+BEGIN;
+
+create table ed_comun.ed_desp_carto_cat(id serial primary key, 
+				id_trabajo integer not null unique,
+				coeficiente_ax double precision default 0,
+				coeficiente_bx double precision default 0,
+				coeficiente_cx double precision default 0,
+				coeficiente_ay double precision default 0,
+				coeficiente_by double precision default 0,
+				coeficiente_cy double precision default 0);
+				
+alter table ed_comun.ed_desp_carto_cat add constraint caj_ed_desp_carto_cat foreign key (id_trabajo) references ed_comun.ed_trabajos(id_trabajo) on delete cascade on update cascade;
+
+create table comun.desp_carto_cat(id serial primary key, 
+				id_trabajo integer not null unique,
+				coeficiente_ax double precision default 0,
+				coeficiente_bx double precision default 0,
+				coeficiente_cx double precision default 0,
+				coeficiente_ay double precision default 0,
+				coeficiente_by double precision default 0,
+				coeficiente_cy double precision default 0);
+				
+alter table comun.desp_carto_cat add constraint caj_desp_carto_cat foreign key (id_trabajo) references comun.trabajos(id_trabajo) on delete cascade on update cascade;
+
+Esto no es necesario si se crean las tablas primero
+--grant usage on all sequences in schema comun,dom to admin_propiedad;
+--grant usage on all sequences in schema ed_comun to admin_propiedad,editor;
+			
+COMMIT;
+

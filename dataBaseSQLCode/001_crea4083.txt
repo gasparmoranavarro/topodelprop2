@@ -1,0 +1,12 @@
+create schema src4083;
+create schema ed_src4083;
+
+--crea las tablas espaciales
+\i c:/delprop/cbd/v2/def/3src4083.txt
+\i c:/delprop/cbd/v2/edicion/3edSrc4083.txt
+
+
+--crea los disparadores sobre las tablas espaciales
+\i c:/delprop/cbd/script/fdisparadoras/crea_disparadores_4083.txt
+
+

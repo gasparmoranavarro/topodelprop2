@@ -1,0 +1,79 @@
+begin;
+CREATE OR REPLACE FUNCTION script.comp_over_finca_def(src varchar, id_trabajo integer) RETURNS boolean AS $$
+/*
+Autor: Gaspar Mora Navarro. Universidad Politécnica de Valencia.
+Esta funcion realiza las siguientes comprobaciones sobre una finca ya insertada de la capa
+ src_XXXXX.fincas:
+	- Que la geometría no sea null
+	- Que la geometría no sea empty
+	- Que la geometría sea simple, es decir que no tenga auto intersecciones
+	- Que el area no sea menor que area_min
+	- Que el perimetro no sea menor que long_min
+
+Si no se cumple alguna de las condiciones anteriores, se genera una excepcion
+
+Si existe solape, se dibuja sobre la capa ed_srcXXXXX.ed_overlaps_fincas. Solo se dibuja el solape con un poligono, aunque haya varios solapes.
+
+Previamente borra los errores anteriores del trabajo, si los habia
+
+Para saber el area, perimetro, longitud y distancia_gap minimas aceptadas hace una consulta
+a la tabla dom.cfg_tamanos
+
+Utiliza las funciones:
+	- script.comprueba_geom
+	- script.comprueba_tama
+	- script.comprueba_overlaps
+Return: true si habia solape, false en caso contrario.
+Raise: exception, si la geometria no es valida.
+
+*/
+DECLARE
+	geom_temp geometry;
+	geom_finca geometry;
+	gid_finca integer;
+	taman boolean;
+	area_m double precision;
+	peri_m double precision;
+	dis_gap double precision;
+	consulta varchar;
+
+	nom_tabla_overlaps varchar;--nombre de la tabla overlaps
+	nom_tabla_fincas_def varchar;--tabla sobre la que se comprueba que no haya huecos o solapes
+	resp boolean;
+	area double precision;
+BEGIN
+	nom_tabla_fincas_def:='src' || src || '.fincas';
+	nom_tabla_overlaps:='ed_src' || src || '.ed_overlaps_fincas';
+
+	consulta:='select geom, gid from ' || nom_tabla_fincas_def || ' t1 where t1.id_trabajo=$1'; 
+	execute consulta into geom_finca, gid_finca using id_trabajo;
+	
+	geom_temp:=script.comprueba_geom(geom_finca);--genera error si es null, empty,...
+
+	select area_min, perim_min, distancia_gap into area_m, peri_m, dis_gap from dom.cfg_tamanos where id >-1;
+
+	if not found then
+		raise exception 'Error en comp_over_fincas: La consulta select area_min, perim_min into area_m, peri_m from dom.cfg_tamanos where id=1 no produjo ningun resultado';
+	end if;
+
+	taman:=script.comprueba_tama(geom_finca,area_m,peri_m);--genera un exception si hay problemas
+
+	resp:=script.borra_overlaps_finca_def(src, id_trabajo);
+
+	area:=script.comprueba_overlaps(geom_finca, nom_tabla_fincas_def, nom_tabla_overlaps, 'id_trabajo', id_trabajo,gid_finca);
+	-- si hay superposiciones,
+	-- de la geometria con las geometrias de nom_tabla_fincas_def
+	-- se dibujan los poligonos interseccion sobre la capa nom_tabla_overlaps
+	-- y devuelve true. Si no hay devuelve false.
+	-- Si devuelve true, en las lineas de abajo se genera una excepcion
+	-- y se aborta todo, con lo que los poligonos interseccion sobre la capa
+	-- nom_tabla_overlaps se borran.
+
+	if area>0.000001 then
+		return true;
+	end if;
+	return false;
+  END;
+$$ LANGUAGE 'plpgsql';
+
+commit;

@@ -1,0 +1,12 @@
+
+--ed_comun
+drop table ed_comun.ed_planos cascade;
+drop table ed_comun.ed_memorias cascade;
+drop table ed_comun.ed_div_vert cascade;
+drop table ed_comun.ed_documentos_estudiados cascade;
+drop table ed_comun.ed_clientes cascade;
+drop table ed_comun.ed_propietarios;
+drop table ed_comun.ed_trabajos cascade;
+drop table ed_comun.ed_division cascade;
+drop table ed_comun.ed_segregacion cascade;
+drop table ed_comun.ed_agrupacion cascade;

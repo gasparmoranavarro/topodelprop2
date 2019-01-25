@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>frmPPalUsuarios</class>
+ <widget class="QMainWindow" name="frmPPalUsuarios">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>317</width>
+    <height>169</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>TopoDelProp-Usuarios</string>
+  </property>
+  <widget class="QWidget" name="centralwidget"/>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>317</width>
+     <height>26</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuCrear_usuario">
+    <property name="title">
+     <string>Gestión de usuarios</string>
+    </property>
+    <addaction name="opCrearUsuario"/>
+    <addaction name="opBuscarEditar"/>
+    <addaction name="opDesactivarEditores"/>
+    <addaction name="opActivarEditores"/>
+   </widget>
+   <widget class="QMenu" name="menuAcerca_de">
+    <property name="title">
+     <string>Acerca de</string>
+    </property>
+    <addaction name="opAcercaDe"/>
+   </widget>
+   <addaction name="menuCrear_usuario"/>
+   <addaction name="menuAcerca_de"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <action name="opCrearUsuario">
+   <property name="text">
+    <string>Crear usuario</string>
+   </property>
+  </action>
+  <action name="opBuscarEditar">
+   <property name="text">
+    <string>Buscar-Editar usuario</string>
+   </property>
+  </action>
+  <action name="opDesactivarEditores">
+   <property name="text">
+    <string>Desactivar todos los editores</string>
+   </property>
+  </action>
+  <action name="opActivarEditores">
+   <property name="text">
+    <string>Activar todos los editores</string>
+   </property>
+  </action>
+  <action name="opAcercaDe">
+   <property name="text">
+    <string>Acerca de ...</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

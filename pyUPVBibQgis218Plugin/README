@@ -1,0 +1,7 @@
+pyUPVBib is a Python library that makes working with PostGIS: Sending data files for storage in bytea fields, geometry, etc..
+
+It also provides data retrieval using select queries, as it has a method that creates queries from Python dictionaries.
+
+pyUPVBib is also a QGIS plugin, which does nothing, but is intended to be used by other plugins.
+
+The TopoDelProp plugin requires this library to work.

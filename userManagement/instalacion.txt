@@ -1,0 +1,6 @@
+1. Instalat Python 2.7
+
+2. Copiar la carpeta UPVDelPropUsu donde se desee
+
+3. Dentro de dicha carpeta, se ejecuta el programa con la orden:
+	python TopoDelPropUsuarios.py

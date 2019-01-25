@@ -1,0 +1,25 @@
+TopoDelProp is a tool for managing geographic data and metadata, to support a legal cadastre. It can be used in any country that uses a projected coordinate system.
+
+You can find the justification for the system and program settings and manual document thesis
+
+The program fist need, for to work, you install the plugin pyUPVBib containing Python libraries necessary.
+The system includes:
+
+    SQL code for creating database in PostgreSQL + PostGIS in the system of coordinates required.
+    Program for user management
+    Documented library of general interest to facilitate work with PostGIS programming in Python
+    TopoDelProp Plugin that allows viewing and editing data from the database.
+
+The system maintains five layers of spatial data:
+
+    Layer farms: MultiPolygon layer with perimeters defining property
+    Boundaries: LineString layer with independent farm boundaries
+    Images boundaries: Point-type layer with the images of the singular points of each boundary
+    Interior Elements: MultiPolygon layer with relevant items within the property, such as buildings, swimming pools, ...
+    Easements: MultiPolygon layer with easements having the farm, such as passing, views, ...
+
+The database has some automatic procedures that prevent entering geometries are wrong, as boundaries, easements or interior elements outside the perimeter of the farm, or images of boundaries outside the boundary to which they belong.
+
+The system requires topographic and legal documents justifying the geometry of a working definition of a farm, as topographical memory, ID cards, or acts of demarcation between adjacent neighbors.
+
+Press the help button plugin for more help.

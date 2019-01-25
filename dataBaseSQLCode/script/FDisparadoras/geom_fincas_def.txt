@@ -1,0 +1,117 @@
+begin;
+CREATE OR REPLACE FUNCTION script.geom_fincas_def() RETURNS trigger AS $$
+/*
+Autor: Gaspar Mora Navarro. Universidad Politécnica de Valencia.
+Este disparador realiza las comprobaciones necesarias para que todos los
+polígonos insertados en la capa src_XXXXX.fincas sean correctos.
+Se ejecuta antes de INSERT o UPDATE: en la tabla fincas
+Realiza las siguientes comprobaciones:
+	- Que la geometría no sea null
+	- Que la geometría no sea empty
+	- Que la geometría sea simple, es decir que no tenga auto intersecciones
+	- Que el area no sea menor que area_min
+	- Que el perimetro no sea menor que long_min
+	- Que el polígono a insertar no se superpone con ningún otro. En tal caso rechaza la insercion y dibuja el solape en la capa ed_srcXXXX.ed_overlaps_fincas. Luego, se genera una excepcion y se aborta la transaccion, con lo que los poligonos interseccion sobre la capa nom_tabla_overlaps se borran. Si se necesita su dibujo, hay que llamar a la funcion script.comprueba_overlaps en otra transaccion que no genere un error.
+	- Que el poligono a insertar no tiene partes sin tocar a otras fincas de la tabla srcXXXXX.fincas. En tal caso se dibujan dichas partes sobre la capa ed_srcXXXX.ed_gaps_fincas o srcXXXXX.gaps_fincas, segun sea la tabla que provoca el la ejecucion del trigger ed_fincas o fincas, respectivamente.
+	- Que Si no hay ningun poligono a menos distancia de distancia_gap, se considera un poligono aislado y no se marca como error gap.
+	- Realiza el enganche de las fincas colindantes a la finca recién insertada.
+
+Para saber el area, perimetro, longitud y distancia_gap minimas aceptadas hace una consulta
+a la tabla dom.cfg_tamanos
+
+IMPORTANTE: Se resalta que las comprobaciones se realizan siempre con la capa definitiva fincas. La insercion de fincas en la capa de edicion es libre, no se hacen comprobaciones. Antes de insertar en ed_fincas se comprueba que no hay solapes ni gaps con la capa fincas. Si hay problemas se dibujan los errores en las capas ed_gaps_fincas y ed_overlaps_fincas.
+
+Utiliza las funciones:
+	- script.comprueba_geom
+	- script.comprueba_tama
+	- script.comprueba_overlaps
+	- script.comprueba_gaps
+*/
+DECLARE
+	geom geometry;
+	taman boolean;
+	area_m double precision;
+	peri_m double precision;
+	dis_gap double precision;
+
+	nom_tabla_overlaps varchar;--nombre de la tabla overlaps
+	nom_tabla_gaps varchar;--nombre de la tabla espacial de los gaps
+	cons_del_old_overlaps varchar;--consulta para borrar los antiguos overlaps del trabajo
+	cons_del_old_gaps varchar;--consulta para borrar los antiguos gaps del trabajo
+	nom_tabla_fincas_def varchar;--tabla sobre la que se comprueba que no haya huecos o solapes
+	resp boolean;
+	area double precision;
+	id_tr_snapar integer;
+BEGIN
+	--si no se cambian las geometrias no se hace nada.
+	raise notice 'ID_trabajo trigger: %', new.id_trabajo;
+	if TG_OP='UPDATE' then
+		if ST_Equals(NEW.geom,OLD.geom) then
+			return NEW;
+		end if;
+	end if;
+	
+	NEW.geom:=script.comprueba_geom(NEW.geom);
+	select area_min, perim_min, distancia_gap into area_m, peri_m, dis_gap from dom.cfg_tamanos where id >-1;
+
+	if not found then
+		raise exception 'Error en geom_fincas: La consulta select area_min, perim_min into area_m, peri_m from dom.cfg_tamanos where id=1 no produjo ningun resultado';
+	end if;
+
+	taman:=script.comprueba_tama(NEW.geom,area_m,peri_m);--genera un exception si hay problemas
+
+	if TG_TABLE_NAME='fincas' then
+		nom_tabla_overlaps:=TG_TABLE_SCHEMA || '.overlaps_fincas';
+		nom_tabla_gaps:=TG_TABLE_SCHEMA || '.gaps_fincas';
+	else
+		raise exception 'Este disparador solo se puede usar con la tabla fincas';
+	end if;
+	
+	nom_tabla_fincas_def:=TG_TABLE_SCHEMA || '.fincas';
+
+	if TG_OP='INSERT' then
+		resp:=script.snap_trabajos_geom(new.geom,nom_tabla_fincas_def);
+	end if;
+
+	area:=script.comprueba_overlaps(NEW.geom, nom_tabla_fincas_def, nom_tabla_overlaps, 'id_trabajo', new.id_trabajo,new.gid);
+	-- si hay superposiciones,
+	-- de la geometria con las geometrias de nom_tabla_fincas_def
+	-- se dibujan los poligonos interseccion sobre la capa nom_tabla_overlaps
+	-- y devuelve true. Si no hay devuelve false.
+	-- Si devuelve true, en las lineas de abajo se genera una excepcion
+	-- y se aborta todo, con lo que los poligonos interseccion sobre la capa
+	-- nom_tabla_overlaps se borran.
+
+	if area>0.00001 then
+		raise exception 'Error de superposicion. La finca id_trabajo: % se superpone con alguna otra finca. Compruebe la capa %', new.id_trabajo, nom_tabla_overlaps;
+		return null;
+	end if;
+
+	cons_del_old_overlaps:='delete from ' || nom_tabla_overlaps || ' where id_trabajo = $1';
+	cons_del_old_gaps:='delete from ' || nom_tabla_gaps || ' where id_trabajo = $1';
+
+
+	--raise notice 'cons_del_old_overlaps: %',cons_del_old_overlaps;
+	--raise notice 'cons_del_old_gaps: %',cons_del_old_gaps;
+	--borro los antiguos errores del trabajo, si los había.
+
+	execute cons_del_old_overlaps using new.id_trabajo;
+	execute cons_del_old_gaps using new.id_trabajo;
+
+
+	resp:=script.comprueba_gaps(NEW.geom, nom_tabla_fincas_def, nom_tabla_gaps, dis_gap,'id_trabajo', new.id_trabajo,new.gid);--si hay porciones de perímetro,
+				--de la geometria sin estar pegados a los poligonos de nom_tabla_fincas_def
+				--se dibujan los arcos erroneos sobre la capa nom_tabla_gaps
+				--y devuelve true, pero el registro se puede insertar, ya que no se sabe
+				--si es error o no.
+
+	if resp=true then
+		raise warning 'La finca tiene partes sin tocar otro poligono. 
+Puede haber errores gaps. Compruebe la capa %',nom_tabla_gaps;
+	end if;
+
+	return NEW;
+  END;
+$$ LANGUAGE 'plpgsql';
+
+commit;

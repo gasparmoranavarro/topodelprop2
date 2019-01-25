@@ -1,0 +1,69 @@
+begin;
+
+CREATE OR REPLACE FUNCTION script.geom_imagenes() RETURNS trigger AS $$
+/*
+	Autor: Gaspar Mora Navarro. Universidad Politécnica de Valencia.
+	Este disparador se usa en la tabla ed_srcXXXXX.ed_img_linde o srcXXXXX.img_linde antes de INSERT or UPDATE.
+	Impide que se inserte una imagen que no este completamente sobre el linde al que se asocia.
+	Se permite que se inserten varias imagenes sobre el mismo vertice del linde,
+siempre que se cambie el nombre de la imagen, ya que gid_linde, nom_arch debe ser unico.
+
+	Utiliza la funcion script.comprueba_covers
+*/
+  DECLARE
+
+	geom_linde geometry;
+
+	geom_img_wkt varchar;
+	consulta varchar;
+
+	tabla_lindes varchar;
+	n_filas integer;
+	resp boolean;
+
+  BEGIN
+
+	if TG_OP='UPDATE' then
+		if ST_Equals(NEW.geom,OLD.geom) then
+			return NEW;
+		end if;
+	end if;
+
+	if not(TG_TABLE_NAME='ed_img_linde' or  TG_TABLE_NAME='img_linde') then
+		raise exception 'Este disparador solo se puede usar con las tablas img_linde o ed_img_linde';
+	end if;
+	
+	if TG_TABLE_NAME='ed_img_linde' then
+		tabla_lindes:=TG_TABLE_SCHEMA || '.ed_lindes';
+	else
+		tabla_lindes:=TG_TABLE_SCHEMA || '.lindes';
+	end if;
+
+	consulta:='select geom from ' || tabla_lindes || ' where gid=$1';
+		--el campo fincas.id_trabajo es unique, solo puede seleccionar una geometria
+	execute consulta into geom_linde using NEW.gid_linde;
+
+	GET DIAGNOSTICS n_filas = ROW_COUNT;
+	
+	if n_filas=0 then
+		raise exception 'No puede insertar imagenes de los lindes antes que los lindes. gid_linde no encontrado: %. Consulta % ',NEW.gid_linde,consulta;
+	elsif geom_linde is null then
+		raise exception 'No puede imagenes de los lindes antes que los lindes. El linde es null';
+	end if;
+	if new.geom is null then
+		raise exception 'La geometria de la imagen no puede ser null';
+	end if;
+
+	NEW.geom:=script.comprueba_geom(NEW.geom);--comprueba que es simple, hace el snap_togrid
+	
+	resp:=script.comprueba_covers(geom_linde,NEW.geom);--devuelve true en el caso 
+			--de que el la imagen este sobre el contorno de la finca.
+	if resp = false then
+		geom_img_wkt:=st_astext(new.geom);
+		raise exception 'La imagen de coordenada (%) no esta sobre el linde. Debe estar sobre uno de los vertices del linde',geom_img_wkt;
+	end if;
+	return NEW;
+  END;
+$$ LANGUAGE 'plpgsql';
+
+commit;

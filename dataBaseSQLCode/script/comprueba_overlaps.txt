@@ -1,0 +1,57 @@
+begin;
+
+CREATE OR REPLACE FUNCTION script.comprueba_overlaps(geom geometry, nom_tabla_comprobar varchar,nom_tabla_overlaps varchar, nom_campo varchar,valor_campo integer, VariaDic gid_excluir integer[]) RETURNS double precision AS $$
+/*Autor: Gaspar Mora Navarro. Universidad Politécnica de Valecncia.
+	Recibe una geometria, una tabla para intentar intersectar la geometria (A) y otra capa para insertar la intersección (B), si la hay. Tambien recibe el nombre de un campo de tipo entero y su valor, para ser insertado en la tabla (B). Este campo esta destinado a almacenar
+algun identificador.
+
+Parametros:
+geom: geometria a intersectar, debe ser de tipo poligono o multipoligono.
+nom_tabla_comprobar: nombre de la tabla sobre la que se intenta intersectar geom
+nom_tabla_overlaps: es la tabla de salida, en el caso de haber interseccion. Debe ser de poligonos.
+nom_campo: nombre de un campo de tipo entero de la tabla nom_tabla_overlaps
+valor_campo: valor entero a insertar en nom_tabla_overlaps.nom_campo
+gid_excluir: gid de la geometria que no se quiere que se compruebe. Es obligatorio, si se quieren comprobar todas, introducir -1.
+
+Devuelve false si no hay solape true si hay solape, y en este caso también inserta un registro.
+
+*/
+DECLARE
+	consulta_int varchar;
+	consulta_ins varchar;
+	geom_int geometry;
+	n integer;
+	gid_ex integer;--gid de la geometria a excluir de la comprobacion
+	area double precision;
+BEGIN
+/*
+	geom:=st_multi(st_geomfromtext('POLYGON ((749462 4416433,749497 4416409,749530 4416446, 749497 4416469, 749462 4416433))',25830));
+
+	nom_tabla_comprobar:='src25830.fincas';
+	nom_tabla_overlaps:='ed_src25830.ed_overlaps_fincas';
+	nom_campo:='id_trabajo';
+	valor_campo:=1;
+*/
+	n:=array_length(gid_excluir,1);
+	if n > 0 then
+		gid_ex:=gid_excluir[1];
+ 
+		consulta_int:= 'select st_multi(st_union(script.stx_extract(st_intersection($1,t1.geom),2))) from ' || nom_tabla_comprobar || ' t1 where t1.gid <> $2 and t1.geom && $1 and st_relate (t1.geom, $1, ''T********'')';
+		execute consulta_int into geom_int using geom,gid_ex;
+	else
+		consulta_int:= 'select st_multi(st_union(script.stx_extract(st_intersection($1,t1.geom),2))) from ' || nom_tabla_comprobar || ' t1 where t1.geom && $1 and st_relate (t1.geom, $1, ''T********'')';
+		execute consulta_int into geom_int using geom;
+	end if;
+
+	if geom_int is null then
+		return 0;
+	else
+		consulta_ins:='insert into ' || nom_tabla_overlaps || ' (geom,' || quote_ident(nom_campo) ||' ) values ($1,$2)';  
+		execute consulta_ins using geom_int,valor_campo;
+		return st_area(geom_int);
+	end if;
+	
+  END;
+$$ LANGUAGE 'plpgsql';
+
+commit;

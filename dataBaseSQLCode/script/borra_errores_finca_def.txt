@@ -1,0 +1,113 @@
+/*
+Hay cuatro funciones, que trabajan con las capas definitivas: 
+
+   - script.borra_gaps_finca_def(src varchar, id_trabajo integer)-->Borra los gaps de un id_trabajo
+   - script.borra_gaps_finca_def(src varchar)-->Borra todos los gaps de un huso
+   - script.borra_overlaps_finca_def(src varchar, id_trabajo integer)-->Borra los overlaps de un id_trabajo
+   - script.borra_overlaps_finca_def(src varchar)-->Borra todos los gapsoverlaps de un huso
+
+*/
+
+begin;
+CREATE OR REPLACE FUNCTION script.borra_gaps_finca_def(src varchar, id_trabajo integer) RETURNS boolean AS $$
+/*
+
+*/
+DECLARE
+	nom_tabla_gaps varchar;--nombre de la tabla espacial de los gaps
+	cons_del_old_gaps varchar;--consulta para borrar los antiguos overlaps del trabajo
+BEGIN
+	nom_tabla_gaps:='src' || src ||'.gaps_fincas';
+
+	cons_del_old_gaps:='delete from ' || nom_tabla_gaps || ' where id_trabajo = $1';
+
+
+	--raise notice 'cons_del_old_gaps: %',cons_del_old_gaps;
+	--borro los antiguos errores del trabajo, si los había.
+
+	execute cons_del_old_gaps using id_trabajo;
+
+	return true;
+  END;
+$$ LANGUAGE 'plpgsql';
+
+commit;
+
+
+begin;
+CREATE OR REPLACE FUNCTION script.borra_overlaps_finca_def(src varchar, id_trabajo integer) RETURNS boolean AS $$
+/*
+
+*/
+DECLARE
+	nom_tabla_overlaps varchar;--nombre de la tabla espacial de los overlaps
+	cons_del_old_overlaps varchar;--consulta para borrar los antiguos overlaps del trabajo
+BEGIN
+	nom_tabla_overlaps:='src' || src || '.overlaps_fincas';
+
+	cons_del_old_overlaps:='delete from ' || nom_tabla_overlaps || ' where id_trabajo = $1';
+
+
+	--raise notice 'cons_del_old_overlaps: %',cons_del_old_overlaps;
+	--raise notice 'cons_del_old_gaps: %',cons_del_old_gaps;
+	--borro los antiguos errores del trabajo, si los había.
+
+	execute cons_del_old_overlaps using id_trabajo;
+
+	return true;
+  END;
+$$ LANGUAGE 'plpgsql';
+
+commit;
+
+begin;
+CREATE OR REPLACE FUNCTION script.borra_gaps_finca_def(src varchar) RETURNS boolean AS $$
+/*
+
+*/
+DECLARE
+	nom_tabla_gaps varchar;--nombre de la tabla espacial de los gaps
+	cons_del_old_gaps varchar;--consulta para borrar los antiguos overlaps del trabajo
+BEGIN
+	nom_tabla_gaps:='src' || src ||'.gaps_fincas';
+
+	cons_del_old_gaps:='delete from ' || nom_tabla_gaps;
+
+
+	--raise notice 'cons_del_old_gaps: %',cons_del_old_gaps;
+	--borro los antiguos errores del trabajo, si los había.
+
+	execute cons_del_old_gaps;
+
+	return true;
+  END;
+$$ LANGUAGE 'plpgsql';
+
+commit;
+
+
+begin;
+CREATE OR REPLACE FUNCTION script.borra_overlaps_finca_def(src varchar) RETURNS boolean AS $$
+/*
+
+*/
+DECLARE
+	nom_tabla_overlaps varchar;--nombre de la tabla espacial de los overlaps
+	cons_del_old_overlaps varchar;--consulta para borrar los antiguos overlaps del trabajo
+BEGIN
+	nom_tabla_overlaps:='src' || src || '.overlaps_fincas';
+
+	cons_del_old_overlaps:='delete from ' || nom_tabla_overlaps;
+
+
+	--raise notice 'cons_del_old_overlaps: %',cons_del_old_overlaps;
+	--raise notice 'cons_del_old_gaps: %',cons_del_old_gaps;
+	--borro los antiguos errores del trabajo, si los había.
+
+	execute cons_del_old_overlaps;
+
+	return true;
+  END;
+$$ LANGUAGE 'plpgsql';
+
+commit;

@@ -1,0 +1,26 @@
+begin;
+
+CREATE OR REPLACE FUNCTION script.comprueba_overlaps_geom(geom geometry,nom_tabla_comprobar varchar, dimension_interseccion integer, gid_excluir integer) RETURNS geometry AS $$
+/*Autor: Gaspar Mora Navarro. Universidad Politécnica de Valecncia.
+	Recibe una geometria, y una tabla para intentar intersectar la geometria. Return
+		la geometria interseccion, o una geometria vacia
+	* dimension_intereseccion es la dimension de los elementos de la interseccion que
+		se quiere recuperar: 0,1,2. Puntos, lineas, poligonos
+	* gid_excluir excluye de la comprobación un gid de la tabla a comprobar, para poder excuir el mismo elemento
+		que se quiere comprobar, ya que siempre intersectara con sigo mismo.
+*/
+DECLARE
+	consulta_int varchar;
+	geom_int geometry;
+
+BEGIN
+	
+	consulta_int:= 'select script.stx_extract(st_intersection($1,t1.geom),$2) from ' || nom_tabla_comprobar || ' t1 where t1.gid <> $3 and t1.geom && $1 and st_relate (t1.geom, $1, ''T********'')';
+
+	execute consulta_int into geom_int using geom,dimension_interseccion,gid_excluir;
+	return geom_int;
+
+  END;
+$$ LANGUAGE 'plpgsql';
+
+commit;

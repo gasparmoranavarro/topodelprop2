@@ -1,0 +1,242 @@
+begin;
+
+CREATE OR REPLACE FUNCTION script.snap_trabajo_a2b(id_tr_snapar integer, tipo_tr_snapar varchar,id_tr_fijo integer, tipo_tr_fijo varchar, distancia_snap double precision) RETURNS boolean AS $$
+/*Autor: Gaspar Mora Navarro. Universidad Politécnica de Valecncia.
+	Snapa la finca del id_tr_snapar sobre la finca id_tr_fijo. Luego snapa los demás elementos del trabajo
+		id_tr_snapar sobre la nueva forma snapada de su finca.
+Parámetros:
+	id_tr_snapar integer: id_trabajo del trabajo cuya finca se va a snapar
+	tipo_tr_snapar varchar: puede ser 'edicion' o 'definitivo'
+	id_tr_fijo integer: id_trabajo del trabajo que se usa para snapar
+	tipo_tr_fijo varchar: puede ser 'edicion' o 'definitivo'
+	distancia_snap double precision: Distancia utilizada para st_snap.
+Return:
+	True si llega al final de la función
+	Raise exception si hay algún problema
+*/
+DECLARE
+	geom_finca geometry;
+	resp boolean;
+	src_trab varchar;
+	nom_tabla_finca varchar;
+	consulta varchar;
+	nom_tabla_tr_snapar varchar;
+BEGIN
+	--BUSCO EL SRC DEL TRABAJO FIJO
+	if tipo_tr_fijo='definitivo' then
+		consulta:='select src_trabajo into src_trab from comun.trabajos where id_trabajo=id_tr_fijo';
+		select src_trabajo into src_trab from comun.trabajos where id_trabajo=id_tr_fijo;
+		nom_tabla_finca:= 'src' || src_trab || '.fincas';
+	else
+		consulta:='select src_trabajo into src_trab from ed_comun.ed_trabajos where id_trabajo=id_tr_fijo';
+		select src_trabajo into src_trab from ed_comun.ed_trabajos where id_trabajo=id_tr_fijo;
+		nom_tabla_finca:= 'ed_src' || src_trab || '.ed_fincas';
+	end if;
+
+	if not found then
+		raise exception 'Error en snap_trabajo_a2b: La consulta % no produjo ningun resultado: id_tr_fijo: %', consulta, id_tr_fijo;
+	end if;	
+	
+	--BUSCO LA GEOMETRÍA DEL TRABAJO FIJO
+	consulta:='select geom from ' || nom_tabla_finca || ' where id_trabajo = $1';
+	--raise notice 'ID trabajo fijo: %',id_tr_fijo;
+
+	execute consulta into geom_finca using id_tr_fijo;
+	resp:=script.snap_trabajo_a2b_geom(id_tr_snapar,tipo_tr_snapar, geom_finca, distancia_snap);
+	return resp;
+  END;
+$$ LANGUAGE 'plpgsql';
+
+commit;
+
+begin;
+
+CREATE OR REPLACE FUNCTION script.snap_trabajo_a2b_geom(id_tr_snapar integer,tipo_tr_snapar varchar, geom_finca_fija geometry, distancia_snap double precision) RETURNS boolean AS $$
+/*Autor: Gaspar Mora Navarro. Universidad Politécnica de Valecncia.
+	Snapa la finca del id_tr_snapar sobre la finca de geometría geom_finca_fija. Luego snapa los demás elementos del trabajo id_tr_snapar sobre la nueva forma snapada de su finca.
+Parámetros:
+	id_tr_snapar integer: id_trabajo del trabajo cuya finca se va a snapar
+	tipo_tr_snapar varchar: puede ser 'edicion' o 'definitivo'
+	geom_finca_fija geometry: geometría de la finca utilizada para snapar la finca del trabajo id_tr_snapar
+	distancia_snap double precision: Distancia utilizada para st_snap.
+Return:
+	True si llega al final de la función
+	Raise exception si hay algún problema
+*/
+DECLARE
+	geom_finca_snapar geometry;
+	resp boolean;
+	src_trab varchar;
+	nom_tabla_finca_snapar varchar;
+	consulta varchar;
+	nueva_geom_finca geometry;
+	nueva_geom_linde geometry;
+	nueva_geom_ei geometry;
+	nueva_geom_serv geometry;
+	cur refcursor;
+	esquema varchar;
+	tabla varchar;
+	geom_snapada geometry;
+	fila record;
+	nom_tabla_finca varchar;
+BEGIN
+
+	if tipo_tr_snapar='definitivo' then
+		consulta:='src_trabajo into src_trab from comun.trabajos where id_trabajo=id_tr_snapar';
+		select src_trabajo into src_trab from comun.trabajos where id_trabajo=id_tr_snapar;
+		nom_tabla_finca:= 'src' || src_trab || '.fincas';
+		esquema:='src' || src_trab;
+		nom_tabla_finca_snapar:= esquema || '.fincas';
+
+	else
+		consulta:='src_trabajo into src_trab from ed_comun.ed_trabajos where id_trabajo=id_tr_snapar';
+		select src_trabajo into src_trab from ed_comun.ed_trabajos where id_trabajo=id_tr_snapar;
+		nom_tabla_finca:= 'ed_src' || src_trab || '.ed_fincas';
+		esquema:='ed_src' || src_trab;
+		nom_tabla_finca_snapar:= esquema || '.ed_fincas';
+	end if;
+
+
+	if not found then
+		raise exception 'Error en snap_trabajo_a2b_geom: La consulta % no produjo ningun resultado. id_tr_snapar:%',consulta, id_tr_snapar;
+	end if;	
+
+	consulta:='select geom from ' || nom_tabla_finca_snapar || ' where id_trabajo = $1';
+
+	execute consulta into geom_finca_snapar using id_tr_snapar;
+	
+	--snapo la finca
+	nueva_geom_finca:=st_multi(st_snap(geom_finca_snapar, geom_finca_fija,distancia_snap));
+	nueva_geom_finca:=script.comprueba_geom(nueva_geom_finca);
+	--raise notice 'Geometria despues comprueba_geom %', geometrytype(nueva_geom_finca);
+	
+	--actualizo la nueva geometria de la finca
+	consulta:='update ' || nom_tabla_finca_snapar || ' set geom=$1 where id_trabajo=$2';
+	execute consulta using nueva_geom_finca,id_tr_snapar;
+	
+	--Snapo los lindes a la finca
+	if tipo_tr_snapar='definitivo' then
+		tabla:= esquema || '.lindes';
+	else
+		tabla:= esquema || '.ed_lindes';
+	end if;
+
+	OPEN cur FOR EXECUTE 'SELECT gid,geom FROM ' || tabla || ' WHERE id_trabajo = $1' USING id_tr_snapar;	
+     	LOOP
+		FETCH cur INTO fila;
+		raise notice 'snapando linde gid: %', fila.gid;
+		EXIT WHEN NOT FOUND;
+		geom_snapada:=st_snap(fila.geom,nueva_geom_finca,distancia_snap);
+		geom_snapada:=script.comprueba_geom(geom_snapada);
+		raise notice 'geometria snapada';
+		consulta:='update ' || tabla || ' set geom=$1 where gid=$2';
+		execute consulta using geom_snapada,fila.gid;
+     	END LOOP;
+     	CLOSE cur;
+
+	--Elementos interiores
+	if tipo_tr_snapar='definitivo' then
+		tabla:= esquema || '.elem_interiores';
+	else
+		tabla:= esquema || '.ed_elem_interiores';
+	end if;
+	OPEN cur FOR EXECUTE 'SELECT gid,geom FROM ' || tabla || ' WHERE id_trabajo = $1' USING id_tr_snapar;	
+     	LOOP
+		FETCH cur INTO fila;
+		raise notice 'snapando elemento interior gid: %', fila.gid;
+		EXIT WHEN NOT FOUND;
+		geom_snapada:=st_multi(st_snap(fila.geom,nueva_geom_finca,distancia_snap));
+		geom_snapada:=script.comprueba_geom(geom_snapada);
+		raise notice 'geometria snapada';
+		consulta:='update ' || tabla || ' set geom=$1 where gid=$2';
+		execute consulta using geom_snapada,fila.gid;
+     	END LOOP;
+     	CLOSE cur;
+
+	--Servidumbres
+	if tipo_tr_snapar='definitivo' then
+		tabla:= esquema || '.servidumbres';
+	else
+		tabla:= esquema || '.ed_servidumbres';
+	end if;
+	OPEN cur FOR EXECUTE 'SELECT gid,geom FROM ' || tabla || ' WHERE id_trabajo = $1' USING id_tr_snapar;	
+     	LOOP
+		FETCH cur INTO fila;
+		raise notice 'snapando elemento interior gid: %', fila.gid;
+		EXIT WHEN NOT FOUND;
+		geom_snapada:=st_multi(st_snap(fila.geom,nueva_geom_finca,distancia_snap));
+		geom_snapada:=script.comprueba_geom(geom_snapada);
+		raise notice 'geometria snapada';
+		consulta:='update ' || tabla || ' set geom=$1 where gid=$2';
+		execute consulta using geom_snapada,fila.gid;
+     	END LOOP;
+     	CLOSE cur;
+
+
+	--Imagenes
+	if tipo_tr_snapar='definitivo' then
+		tabla:= esquema || '.img_linde';
+	else
+		tabla:= esquema || '.ed_img_linde';
+	end if;
+	OPEN cur FOR EXECUTE 'SELECT gid,geom FROM ' || tabla || ' WHERE id_trabajo = $1' USING id_tr_snapar;	
+     	LOOP
+		FETCH cur INTO fila;
+		raise notice 'snapando imagen gid: %', fila.gid;
+		EXIT WHEN NOT FOUND;
+		geom_snapada:=st_snap(fila.geom,nueva_geom_finca,distancia_snap);
+		geom_snapada:=script.comprueba_geom(geom_snapada);
+		raise notice 'geometria snapada';
+		consulta:='update ' || tabla || ' set geom=$1 where gid=$2';
+		execute consulta using geom_snapada,fila.gid;
+     	END LOOP;
+     	CLOSE cur;
+	return true;
+  END;
+$$ LANGUAGE 'plpgsql';
+
+commit;
+
+begin;
+
+CREATE OR REPLACE FUNCTION script.comprueba_geom_st_snap(geom2 geometry) RETURNS geometry AS $$
+/*Autor: Gaspar Mora Navarro. Universidad Politécnica de Valecncia.
+Se puede aplicar a todas las geometrías.
+Realiza las siguientes comprobaciones:
+	- Que la geometría no sea null
+	- Que la geometría no sea empty
+	- Que la geometría sea simple, es decir que no tenga auto intersecciones
+Si alguna de las tres condiciones anteriores no es cierta, genera un error. En caso
+contrario, elimina los puntos duplicados de la geometría, si los tiene, y devuelve
+la nueva geometría sin duplicados.
+	- Si la geometría es un polígono o multipolígono, fuerza el sentido de los anillos.
+
+*/
+  DECLARE
+	tipo_geom varchar;
+  BEGIN
+	if geom2 is null then
+		raise exception 'Error, la geometria es null, despues de st_snap';
+	end if;
+	if st_isEmpty(geom2) then
+		raise exception 'Error, la geometria esta vacia, despues de st_snap';
+	end if;
+
+	if not(st_isSimple(geom2)) then
+		raise exception 'Error, la geometria no es simple, despues de st_snap';
+	end if;
+	if not(st_isValid(geom2)) then
+		raise exception 'Error, la geometria valida, despues de st_snap';
+	end if;
+
+	geom2:=st_removerepeatedpoints(geom2);
+
+	tipo_geom:=ST_GeometryType(geom2);
+	if 'ST_Polygon' = tipo_geom or 'ST_MultiPolygon' = tipo_geom then
+		geom2:=st_forcerhr(geom2);
+	end if;
+	return geom2;
+  END;
+$$ LANGUAGE 'plpgsql';
+
+commit;

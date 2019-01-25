@@ -1,0 +1,46 @@
+begin;
+
+CREATE TRIGGER actualiza_fecha_dom_config AFTER INSERT OR DELETE OR UPDATE ON dom.config FOR EACH ROW EXECUTE PROCEDURE script.actualiza_fecha_dom();
+CREATE TRIGGER actualiza_fecha_dom_modo_obt_linde AFTER INSERT OR DELETE OR UPDATE ON dom.modo_obt_linde FOR EACH ROW EXECUTE PROCEDURE script.actualiza_fecha_dom();
+CREATE TRIGGER actualiza_fecha_dom_equipo_utilizado AFTER INSERT OR DELETE OR UPDATE ON dom.equipo_utilizado FOR EACH ROW EXECUTE PROCEDURE script.actualiza_fecha_dom();
+CREATE TRIGGER actualiza_fecha_dom_tipo_propietario AFTER INSERT OR DELETE OR UPDATE ON dom.tipo_propietario FOR EACH ROW EXECUTE PROCEDURE script.actualiza_fecha_dom();
+CREATE TRIGGER actualiza_fecha_dom_tipo_documento AFTER INSERT OR DELETE OR UPDATE ON dom.tipo_documento FOR EACH ROW EXECUTE PROCEDURE script.actualiza_fecha_dom();
+CREATE TRIGGER actualiza_fecha_dom_presente_medicion AFTER INSERT OR DELETE OR UPDATE ON dom.presente_medicion FOR EACH ROW EXECUTE PROCEDURE script.actualiza_fecha_dom();
+CREATE TRIGGER actualiza_fecha_dom_src_trabajo AFTER INSERT OR DELETE OR UPDATE ON dom.src_trabajo FOR EACH ROW EXECUTE PROCEDURE script.actualiza_fecha_dom();
+CREATE TRIGGER actualiza_fecha_dom_activado AFTER INSERT OR DELETE OR UPDATE ON dom.activado FOR EACH ROW EXECUTE PROCEDURE script.actualiza_fecha_dom();
+CREATE TRIGGER actualiza_fecha_dom_finca_matriz AFTER INSERT OR DELETE OR UPDATE ON dom.finca_matriz FOR EACH ROW EXECUTE PROCEDURE script.actualiza_fecha_dom();
+CREATE TRIGGER actualiza_fecha_dom_estado_trabajo AFTER INSERT OR DELETE OR UPDATE ON dom.estado_trabajo FOR EACH ROW EXECUTE PROCEDURE script.actualiza_fecha_dom();
+CREATE TRIGGER actualiza_fecha_dom_tipo_linde AFTER INSERT OR DELETE OR UPDATE ON dom.tipo_linde FOR EACH ROW EXECUTE PROCEDURE script.actualiza_fecha_dom();
+CREATE TRIGGER actualiza_fecha_dom_tipo_colindante AFTER INSERT OR DELETE OR UPDATE ON dom.tipo_colindante FOR EACH ROW EXECUTE PROCEDURE script.actualiza_fecha_dom();
+CREATE TRIGGER actualiza_fecha_dom_opinion_colindantes AFTER INSERT OR DELETE OR UPDATE ON dom.opinion_colindantes FOR EACH ROW EXECUTE PROCEDURE script.actualiza_fecha_dom();
+CREATE TRIGGER actualiza_fecha_dom_cfg_tamanos AFTER INSERT OR DELETE OR UPDATE ON dom.cfg_tamanos FOR EACH ROW EXECUTE PROCEDURE script.actualiza_fecha_dom();
+CREATE TRIGGER actualiza_fecha_dom_provincia AFTER INSERT OR DELETE OR UPDATE ON dom.provincia FOR EACH ROW EXECUTE PROCEDURE script.actualiza_fecha_dom();
+CREATE TRIGGER actualiza_fecha_dom_tipo_firma AFTER INSERT OR DELETE OR UPDATE ON dom.tipo_firma FOR EACH ROW EXECUTE PROCEDURE script.actualiza_fecha_dom();
+CREATE TRIGGER actualiza_fecha_dom_municipio AFTER INSERT OR DELETE OR UPDATE ON dom.municipio FOR EACH ROW EXECUTE PROCEDURE script.actualiza_fecha_dom();
+CREATE TRIGGER actualiza_fecha_dom_tipo_usuario AFTER INSERT OR DELETE OR UPDATE ON dom.tipo_usuario FOR EACH ROW EXECUTE PROCEDURE script.actualiza_fecha_dom();
+CREATE TRIGGER actualiza_fecha_dom_tipo_trabajo AFTER INSERT OR DELETE OR UPDATE ON dom.tipo_trabajo FOR EACH ROW EXECUTE PROCEDURE script.actualiza_fecha_dom();
+CREATE TRIGGER actualiza_fecha_dom_motivo_trabajo AFTER INSERT OR DELETE OR UPDATE ON dom.motivo_trabajo FOR EACH ROW EXECUTE PROCEDURE script.actualiza_fecha_dom();
+CREATE TRIGGER actualiza_fecha_dom_tipo_finca_catastral AFTER INSERT OR DELETE OR UPDATE ON dom.tipo_finca_catastral FOR EACH ROW EXECUTE PROCEDURE script.actualiza_fecha_dom();
+CREATE TRIGGER actualiza_fecha_dom_tipo_finca AFTER INSERT OR DELETE OR UPDATE ON dom.tipo_finca FOR EACH ROW EXECUTE PROCEDURE script.actualiza_fecha_dom();
+CREATE TRIGGER actualiza_fecha_dom_tipo_servidumbre AFTER INSERT OR DELETE OR UPDATE ON dom.tipo_servidumbre FOR EACH ROW EXECUTE PROCEDURE script.actualiza_fecha_dom();
+CREATE TRIGGER actualiza_fecha_dom_lugar_medicion AFTER INSERT OR DELETE OR UPDATE ON dom.lugar_medicion FOR EACH ROW EXECUTE PROCEDURE script.actualiza_fecha_dom();
+CREATE TRIGGER actualiza_fecha_dom_tip_lin_terr AFTER INSERT OR DELETE OR UPDATE ON dom.tip_lin_terr FOR EACH ROW EXECUTE PROCEDURE script.actualiza_fecha_dom();
+CREATE TRIGGER actualiza_fecha_dom_tipo_material AFTER INSERT OR DELETE OR UPDATE ON dom.tipo_material FOR EACH ROW EXECUTE PROCEDURE script.actualiza_fecha_dom();
+CREATE TRIGGER actualiza_fecha_dom_tipo_lin_proyec AFTER INSERT OR DELETE OR UPDATE ON dom.tipo_lin_proyec FOR EACH ROW EXECUTE PROCEDURE script.actualiza_fecha_dom();
+CREATE TRIGGER actualiza_fecha_dom_tipo_elem_int AFTER INSERT OR DELETE OR UPDATE ON dom.tipo_elem_int FOR EACH ROW EXECUTE PROCEDURE script.actualiza_fecha_dom();
+CREATE TRIGGER acceso_trabajo_ed_segregacion BEFORE INSERT OR DELETE OR UPDATE ON ed_comun.ed_segregacion FOR EACH ROW EXECUTE PROCEDURE script.acceso_trabajo();
+CREATE TRIGGER acceso_trabajo_ed_documentos_estudiados BEFORE INSERT OR DELETE OR UPDATE ON ed_comun.ed_documentos_estudiados FOR EACH ROW EXECUTE PROCEDURE script.acceso_trabajo();
+CREATE TRIGGER acceso_trabajo_ed_memorias BEFORE INSERT OR DELETE OR UPDATE ON ed_comun.ed_memorias FOR EACH ROW EXECUTE PROCEDURE script.acceso_trabajo();
+CREATE TRIGGER acceso_trabajo_ed_planos BEFORE INSERT OR DELETE OR UPDATE ON ed_comun.ed_planos FOR EACH ROW EXECUTE PROCEDURE script.acceso_trabajo();
+CREATE TRIGGER acceso_trabajo_ed_propietarios BEFORE INSERT OR DELETE OR UPDATE ON ed_comun.ed_propietarios FOR EACH ROW EXECUTE PROCEDURE script.acceso_trabajo();
+CREATE TRIGGER acceso_trabajo_ed_div_vert BEFORE INSERT OR DELETE OR UPDATE ON ed_comun.ed_div_vert FOR EACH ROW EXECUTE PROCEDURE script.acceso_trabajo();
+CREATE TRIGGER acceso_trabajo_ed_agrupacion BEFORE INSERT OR DELETE OR UPDATE ON ed_comun.ed_agrupacion FOR EACH ROW EXECUTE PROCEDURE script.acceso_trabajo();
+CREATE TRIGGER acceso_trabajo_ed_division BEFORE INSERT OR DELETE OR UPDATE ON ed_comun.ed_division FOR EACH ROW EXECUTE PROCEDURE script.acceso_trabajo();
+CREATE TRIGGER acceso_trabajo_ed_clientes BEFORE INSERT OR DELETE OR UPDATE ON ed_comun.ed_clientes FOR EACH ROW EXECUTE PROCEDURE script.acceso_trabajo();
+CREATE TRIGGER cambios_datos_trabajo_ed_trabajos BEFORE DELETE OR UPDATE ON ed_comun.ed_trabajos FOR EACH ROW EXECUTE PROCEDURE script.cambios_datos_trabajo();
+CREATE TRIGGER comprueba_usuario_usuarios BEFORE UPDATE ON comun.usuarios FOR EACH ROW EXECUTE PROCEDURE script.comprueba_usuario();
+CREATE TRIGGER activa_usuario_usuarios AFTER UPDATE ON comun.usuarios FOR EACH ROW EXECUTE PROCEDURE script.activa_usuario();
+
+CREATE TRIGGER actualiza_fecha_dom_namespace AFTER INSERT OR DELETE OR UPDATE ON dom.namespace FOR EACH ROW EXECUTE PROCEDURE script.actualiza_fecha_dom();
+
+commit;

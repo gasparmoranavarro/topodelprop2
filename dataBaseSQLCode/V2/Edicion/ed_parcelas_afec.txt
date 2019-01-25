@@ -1,0 +1,62 @@
+begin;
+
+--ed_parcelas afectadas 25828
+create table ed_src25828.ed_parcelas_afectadas(gid serial primary key, id_trabajo integer not null, gid_finca integer, 
+	localid varchar,namespace varchar not null, nationalcadastralreference varchar(20) not null, 
+	areavalue double precision  not null,label varchar,endlifespanversion timestamp,beginlifespanversion timestamp  not null);
+
+select addgeometrycolumn('ed_src25828','ed_parcelas_afectadas','geom',25828,'MULTIPOLYGON',2, false);
+alter table ed_src25828.ed_parcelas_afectadas add constraint caj_parcelas_afectadas_ntrab foreign key (id_trabajo) references ed_comun.ed_trabajos(id_trabajo) on update cascade on delete cascade;
+alter table ed_src25828.ed_parcelas_afectadas add constraint caj_gid_finca foreign key (gid_finca) references ed_src25828.ed_fincas(gid) on update cascade on delete cascade;
+
+--ed_parcelas afectadas 25829
+create table ed_src25829.ed_parcelas_afectadas(gid serial primary key, id_trabajo integer not null, gid_finca integer, 
+	localid varchar,namespace varchar not null, nationalcadastralreference varchar(20) not null, 
+	areavalue double precision  not null,label varchar,endlifespanversion timestamp,beginlifespanversion timestamp  not null);
+
+select addgeometrycolumn('ed_src25829','ed_parcelas_afectadas','geom',25829,'MULTIPOLYGON',2, false);
+alter table ed_src25829.ed_parcelas_afectadas add constraint caj_parcelas_afectadas_ntrab foreign key (id_trabajo) references ed_comun.ed_trabajos(id_trabajo) on update cascade on delete cascade;
+alter table ed_src25829.ed_parcelas_afectadas add constraint caj_gid_finca foreign key (gid_finca) references ed_src25829.ed_fincas(gid) on update cascade on delete cascade;
+
+--ed_parcelas afectadas 25830
+create table ed_src25830.ed_parcelas_afectadas(gid serial primary key, id_trabajo integer not null, gid_finca integer, 
+	localid varchar,namespace varchar not null, nationalcadastralreference varchar(20) not null, 
+	areavalue double precision  not null,label varchar,endlifespanversion timestamp,beginlifespanversion timestamp  not null);
+
+select addgeometrycolumn('ed_src25830','ed_parcelas_afectadas','geom',25830,'MULTIPOLYGON',2, false);
+alter table ed_src25830.ed_parcelas_afectadas add constraint caj_parcelas_afectadas_ntrab foreign key (id_trabajo) references ed_comun.ed_trabajos(id_trabajo) on update cascade on delete cascade;
+alter table ed_src25830.ed_parcelas_afectadas add constraint caj_gid_finca foreign key (gid_finca) references ed_src25830.ed_fincas(gid) on update cascade on delete cascade;
+
+--ed_parcelas afectadas 25831
+create table ed_src25831.ed_parcelas_afectadas(gid serial primary key, id_trabajo integer not null, gid_finca integer, 
+	localid varchar,namespace varchar not null, nationalcadastralreference varchar(20) not null, 
+	areavalue double precision  not null,label varchar,endlifespanversion timestamp,beginlifespanversion timestamp  not null);
+
+select addgeometrycolumn('ed_src25831','ed_parcelas_afectadas','geom',25831,'MULTIPOLYGON',2, false);
+alter table ed_src25831.ed_parcelas_afectadas add constraint caj_parcelas_afectadas_ntrab foreign key (id_trabajo) references ed_comun.ed_trabajos(id_trabajo) on update cascade on delete cascade;
+alter table ed_src25831.ed_parcelas_afectadas add constraint caj_gid_finca foreign key (gid_finca) references ed_src25831.ed_fincas(gid) on update cascade on delete cascade;
+
+--integridad referencial sobre el dominio namespace
+alter table ed_src25828.ed_parcelas_afectadas add constraint caj_namespace foreign key (namespace) references dom.namespace(namespace) on delete cascade on update cascade;
+alter table ed_src25829.ed_parcelas_afectadas add constraint caj_namespace foreign key (namespace) references dom.namespace(namespace) on delete cascade on update cascade;
+alter table ed_src25830.ed_parcelas_afectadas add constraint caj_namespace foreign key (namespace) references dom.namespace(namespace) on delete cascade on update cascade;
+alter table ed_src25831.ed_parcelas_afectadas add constraint caj_namespace foreign key (namespace) references dom.namespace(namespace) on delete cascade on update cascade;
+
+
+--Indices
+create index ie_ed_parcelas_afectadas_gist on ed_src25828.ed_parcelas_afectadas using gist(geom);
+create index ie_ed_parcelas_afectadas_gist on ed_src25829.ed_parcelas_afectadas using gist(geom);
+create index ie_ed_parcelas_afectadas_gist on ed_src25830.ed_parcelas_afectadas using gist(geom);
+create index ie_ed_parcelas_afectadas_gist on ed_src25831.ed_parcelas_afectadas using gist(geom);
+
+commit;
+
+--vacuums
+vacuum analyze ed_src25828.ed_parcelas_afectadas;
+vacuum analyze ed_src25829.ed_parcelas_afectadas;
+vacuum analyze ed_src25830.ed_parcelas_afectadas;
+vacuum analyze ed_src25831.ed_parcelas_afectadas;
+
+
+
+

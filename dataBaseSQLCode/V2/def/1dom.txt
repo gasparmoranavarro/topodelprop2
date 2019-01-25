@@ -1,0 +1,339 @@
+--Hay que cambiar las variables siguientes de postgresql.conf
+--	statement_timeout=60000 #Si la sentencia tarda mas de 1 minuto en acabar,
+--				#se aborta. El tiempo solo cuenta trabajo del servidor.
+--	bytea_output=escape #Necesario para que los archivos se recuperen bien desde python.
+--
+
+begin;
+
+--documentos estudiados
+create table dom.tipo_documento (id serial, tipo_documento varchar(100) primary key);
+insert into dom.tipo_documento (tipo_documento) values ('Escritura');
+insert into dom.tipo_documento (tipo_documento) values ('Plano catastral');
+insert into dom.tipo_documento (tipo_documento) values ('Fotografía aérea');
+insert into dom.tipo_documento (tipo_documento) values ('Planeamiento municipal vigente');
+insert into dom.tipo_documento (tipo_documento) values ('Proyecto de urbanización');
+insert into dom.tipo_documento (tipo_documento) values ('Proyecto');
+
+--presente_medicion
+create table dom.presente_medicion (id serial, presente_medicion varchar(5) primary key);
+insert into dom.presente_medicion (presente_medicion) values ('True');
+insert into dom.presente_medicion (presente_medicion) values ('False');
+
+--activado: si es true tiene permiso de editor, si es false, de consultor
+create table dom.activado (id serial, activado varchar(5) primary key);
+insert into dom.activado (activado) values ('True');
+insert into dom.activado (activado) values ('False');
+
+
+--finca_matriz
+create table dom.finca_matriz (id serial, finca_matriz varchar(5) primary key);
+insert into dom.finca_matriz (finca_matriz) values ('True');
+insert into dom.finca_matriz (finca_matriz) values ('False');
+
+--tipo_trabajo
+create table dom.tipo_trabajo (id serial, tipo_trabajo varchar(100) primary key);
+insert into dom.tipo_trabajo (tipo_trabajo) values ('Deslinde y amojonamiento');
+insert into dom.tipo_trabajo (tipo_trabajo) values ('Unión de fincas');
+insert into dom.tipo_trabajo (tipo_trabajo) values ('División de fincas');
+insert into dom.tipo_trabajo (tipo_trabajo) values ('Segregación de fincas');
+insert into dom.tipo_trabajo (tipo_trabajo) values ('Actualización catastral');
+insert into dom.tipo_trabajo (tipo_trabajo) values ('Añadir bases topográficas');
+
+--motivo_trabajo
+create table dom.motivo_trabajo (id serial, motivo_trabajo varchar(100) primary key);
+insert into dom.motivo_trabajo (motivo_trabajo) values ('Localizar la finca, deslindar y amojonar');
+insert into dom.motivo_trabajo (motivo_trabajo) values ('Deslindar y amojonar');
+insert into dom.motivo_trabajo (motivo_trabajo) values ('Actualización datos catastrales');
+insert into dom.motivo_trabajo (motivo_trabajo) values ('Deslindar y amojonar por compra');
+insert into dom.motivo_trabajo (motivo_trabajo) values ('Deslindar y amojonar por venta');
+insert into dom.motivo_trabajo (motivo_trabajo) values ('Deslindar y amojonar por herencia');
+insert into dom.motivo_trabajo (motivo_trabajo) values ('División');
+insert into dom.motivo_trabajo (motivo_trabajo) values ('Agrupacion');
+insert into dom.motivo_trabajo (motivo_trabajo) values ('Segregación');
+
+
+--EQUIPO_UTILIZADO
+create table dom.equipo_utilizado (id serial, equipo_utilizado varchar(30) primary key);
+insert into dom.equipo_utilizado (equipo_utilizado) values ('GPS en modo VRS');
+insert into dom.equipo_utilizado (equipo_utilizado) values ('GPS en modo RTK');
+insert into dom.equipo_utilizado (equipo_utilizado) values ('GPS cinemático');
+insert into dom.equipo_utilizado (equipo_utilizado) values ('Estación total');
+insert into dom.equipo_utilizado (equipo_utilizado) values ('Sin equipo. Digitalizado');
+
+--usuarios
+create table dom.tipo_usuario (id serial, tipo_usuario varchar(20) primary key);
+--consultor: solo puede leer las capas definitivas y el historico.
+--editor: puede leer las capas definitivas y el historico, crear nuevos trabajos y modificar los suyos en edicion
+--admin_propiedad: puede modificar todas las tablas y crear nuevos usuarios con acceso a la bda propiedad.
+
+--tipos de usuario:
+	--consultor: solo lee capas de geometria, en el nivel definitivo
+	--consultor_autorizado:lee toda la informacion del nivel definitivo, nada del de edic.
+	--editor:puede escribir en el nivel de edicion, leer y modificar solo sus trabajos
+		--del nivel de edicion, y leer las capas de geometria del nivel definitivo.
+	--admin_propiedad:puede leer y modificar todos los niveles, y crear usuarios para
+		-- la base de datos propiedad. Esto hay que hacerlo a mano. ver 
+		-- creausuarios.txt
+
+insert into dom.tipo_usuario (tipo_usuario) values ('consultor');
+insert into dom.tipo_usuario (tipo_usuario) values ('consultor_autorizado');
+insert into dom.tipo_usuario (tipo_usuario) values ('editor');
+insert into dom.tipo_usuario (tipo_usuario) values ('admin_propiedad');
+
+
+--municipio. El campo municipio lleva el coddigo ine delante CODINE;MUNICIPIO
+--Esto es asi porque es clave principal y hay nombres de municipio repetidos
+
+create table dom.municipio (id serial, municipio varchar(56) primary key, cod_ine varchar(6), muni varchar(50), huso varchar(3));
+COPY dom.municipio (municipio) from 'c:/delprop/cbd/v2/def/municipio.txt';
+update dom.municipio set huso='30';
+
+
+--provincia
+create table dom.provincia (id serial, provincia varchar(30) primary key);
+COPY dom.provincia (provincia) from 'c:/delprop/cbd/v2/def/provincia.txt';
+
+--trabajos
+
+--ESTADO TRABAJO
+--Puede ser en edición, validado o historico
+create table dom.estado_trabajo (id serial, estado_trabajo varchar(10) primary key);
+insert into dom.estado_trabajo (estado_trabajo) values ('edicion');
+insert into dom.estado_trabajo (estado_trabajo) values ('esp_valid');
+--    Edicion terminada, esperando validacion
+insert into dom.estado_trabajo (estado_trabajo) values ('validado');
+insert into dom.estado_trabajo (estado_trabajo) values ('historico');
+
+--src_trabajo
+create table dom.src_trabajo (id serial, src_trabajo varchar(6) primary key);
+insert into dom.src_trabajo(src_trabajo) values ('4082');
+insert into dom.src_trabajo(src_trabajo) values ('4083');
+insert into dom.src_trabajo(src_trabajo) values ('25829');
+insert into dom.src_trabajo(src_trabajo) values ('25830');
+insert into dom.src_trabajo(src_trabajo) values ('25831');
+
+--Tipo_finca
+create table dom.tipo_finca (id serial, tipo_finca varchar(40) primary key);
+insert into dom.tipo_finca (tipo_finca) values ('Medida');
+insert into dom.tipo_finca (tipo_finca) values ('Replanteada');
+insert into dom.tipo_finca (tipo_finca) values ('Medida y replanteada');
+insert into dom.tipo_finca (tipo_finca) values ('Proyectada en reparcelacion');
+
+--Tipo_servidumbre
+create table dom.tipo_servidumbre (id serial, tipo_servidumbre varchar(100) primary key);
+insert into dom.tipo_servidumbre (tipo_servidumbre) values ('Abrevadero: La que grava un predio adonde los ganados de otro van a beber');
+insert into dom.tipo_servidumbre (tipo_servidumbre) values ('Acueducto: La que grava un predio por donde pasa una conducción de agua');
+insert into dom.tipo_servidumbre (tipo_servidumbre) values ('Aguas');
+insert into dom.tipo_servidumbre (tipo_servidumbre) values ('Alzamiento de pared medianera');
+insert into dom.tipo_servidumbre (tipo_servidumbre) values ('Aprovechamiento de leña y demás productos de los montes');
+insert into dom.tipo_servidumbre (tipo_servidumbre) values ('Árboles en seto vivo');
+insert into dom.tipo_servidumbre (tipo_servidumbre) values ('Comunidad de pastos');
+insert into dom.tipo_servidumbre (tipo_servidumbre) values ('Contribución a los pastos');
+insert into dom.tipo_servidumbre (tipo_servidumbre) values ('Corral o patio');
+insert into dom.tipo_servidumbre (tipo_servidumbre) values ('Desagüe de edificios');
+insert into dom.tipo_servidumbre (tipo_servidumbre) values ('Distancia y obras intermedias');
+insert into dom.tipo_servidumbre (tipo_servidumbre) values ('Edificio apoyado en pared medianera');
+insert into dom.tipo_servidumbre (tipo_servidumbre) values ('En la propiedad');
+insert into dom.tipo_servidumbre (tipo_servidumbre) values ('En el usufructo');
+insert into dom.tipo_servidumbre (tipo_servidumbre) values ('Luces: Aquella que limita la construcción o altura de un edificio para dejar libre paso de la luz');
+insert into dom.tipo_servidumbre (tipo_servidumbre) values ('Mantenimiento de vallados, setos vivos, zanjas acequias medianeras');
+insert into dom.tipo_servidumbre (tipo_servidumbre) values ('Medianería');
+insert into dom.tipo_servidumbre (tipo_servidumbre) values ('Paso: La que da derecho a entrar en una finca no lindante con camino público');
+insert into dom.tipo_servidumbre (tipo_servidumbre) values ('Paso de materiales');
+insert into dom.tipo_servidumbre (tipo_servidumbre) values ('Rama de árboles');
+insert into dom.tipo_servidumbre (tipo_servidumbre) values ('Reconstrucción de pared medianera');
+insert into dom.tipo_servidumbre (tipo_servidumbre) values ('Signo aparente');
+insert into dom.tipo_servidumbre (tipo_servidumbre) values ('Uso de pared medianera');
+insert into dom.tipo_servidumbre (tipo_servidumbre) values ('Vistas: La que da al predio dominante el derecho de tener ventanas u otros huecos en su casa');
+insert into dom.tipo_servidumbre (tipo_servidumbre) values ('Zanja y acequias');
+insert into dom.tipo_servidumbre (tipo_servidumbre) values ('Aguas (terrestres)');
+insert into dom.tipo_servidumbre (tipo_servidumbre) values ('Costas');
+insert into dom.tipo_servidumbre (tipo_servidumbre) values ('Señales Geodésicas y Geofísicas');
+insert into dom.tipo_servidumbre (tipo_servidumbre) values ('Carreteras');
+insert into dom.tipo_servidumbre (tipo_servidumbre) values ('Ferrocarriles');
+insert into dom.tipo_servidumbre (tipo_servidumbre) values ('Telecomunicaciones');
+insert into dom.tipo_servidumbre (tipo_servidumbre) values ('Eléctricas');
+insert into dom.tipo_servidumbre (tipo_servidumbre) values ('Hidrocarburos');
+insert into dom.tipo_servidumbre (tipo_servidumbre) values ('Aeronáuticas');
+
+--TIPO FIRMA
+create table dom.tipo_firma (id_firma serial, tipo_firma varchar(30) primary key);
+insert into dom.tipo_firma(tipo_firma) values ('No');
+insert into dom.tipo_firma(tipo_firma) values ('Si. Ante el tecnico');
+insert into dom.tipo_firma(tipo_firma) values ('Si. Ante notario');
+
+--TIPO LINDE
+create table dom.tipo_linde (id serial, tipo_linde varchar(50) primary key, ayuda varchar(200));
+insert into dom.tipo_linde (tipo_linde, ayuda) values ('Existe en el terreno', 'Se distingue y se puede medir');
+insert into dom.tipo_linde (tipo_linde, ayuda) values ('No existe en el terreno y se replantea', 'Se utilizan planos catastrales antiguos');
+insert into dom.tipo_linde (tipo_linde, ayuda) values ('Proyectado en algún documento', 'Se utilizan planos de reparcelaciones, cartografía del MMA, ...');
+insert into dom.tipo_linde (tipo_linde, ayuda) values ('Digitalizado sobre ortofoto', 'Digitalizado sobre ortofoto');
+
+--TIPO LINDE TERRENO
+create table dom.tip_lin_terr (id serial, tip_lin_terr varchar(100) primary key);
+insert into dom.tip_lin_terr (tip_lin_terr) values ('Muro');
+insert into dom.tip_lin_terr (tip_lin_terr) values ('Valla');
+insert into dom.tip_lin_terr (tip_lin_terr) values ('Cavallón');
+insert into dom.tip_lin_terr (tip_lin_terr) values ('Acequia');
+insert into dom.tip_lin_terr (tip_lin_terr) values ('Camino');
+insert into dom.tip_lin_terr (tip_lin_terr) values ('Pie de talud');
+insert into dom.tip_lin_terr (tip_lin_terr) values ('Amojonado');
+insert into dom.tip_lin_terr (tip_lin_terr) values ('Cuneta');
+insert into dom.tip_lin_terr (tip_lin_terr) values ('Río');
+insert into dom.tip_lin_terr (tip_lin_terr) values ('Tubería');
+insert into dom.tip_lin_terr (tip_lin_terr) values ('Barranco');
+insert into dom.tip_lin_terr (tip_lin_terr) values ('Senda');
+insert into dom.tip_lin_terr (tip_lin_terr) values ('Pared de edificación');
+
+--TIPO MATERIAL
+create table dom.tipo_material (id serial, tipo_material varchar(100) primary key);
+insert into dom.tipo_material (tipo_material) values ('Piedra y cemento');
+insert into dom.tipo_material (tipo_material) values ('Piedras sueltas ordenadas');
+insert into dom.tipo_material (tipo_material) values ('Materiales diversos de desecho');
+insert into dom.tipo_material (tipo_material) values ('Bloques');
+insert into dom.tipo_material (tipo_material) values ('Hormigón');
+insert into dom.tipo_material (tipo_material) values ('Ladrillos');
+insert into dom.tipo_material (tipo_material) values ('Cemento');
+insert into dom.tipo_material (tipo_material) values ('Yeso');
+insert into dom.tipo_material (tipo_material) values ('Asfalto');
+insert into dom.tipo_material (tipo_material) values ('Tierra');
+insert into dom.tipo_material (tipo_material) values ('Grava');
+insert into dom.tipo_material (tipo_material) values ('Estaca');
+insert into dom.tipo_material (tipo_material) values ('Clavo');
+insert into dom.tipo_material (tipo_material) values ('Mojón de obra');
+insert into dom.tipo_material (tipo_material) values ('Hito feno');
+insert into dom.tipo_material (tipo_material) values ('Árbol');
+insert into dom.tipo_material (tipo_material) values ('Piedra');
+insert into dom.tipo_material (tipo_material) values ('Redondo de hierro');
+insert into dom.tipo_material (tipo_material) values ('Metal');
+
+--LUGAR MEDICION
+create table dom.lugar_medicion (id serial, lugar_medicion varchar(100) primary key);
+insert into dom.lugar_medicion (lugar_medicion) values ('Interior de la finca. No pertenece a la finca');
+insert into dom.lugar_medicion (lugar_medicion) values ('Exterior de la finca. Pertenece a la finca');
+insert into dom.lugar_medicion (lugar_medicion) values ('Eje. Es medianero');
+insert into dom.lugar_medicion (lugar_medicion) values ('Cabeza de talud');
+insert into dom.lugar_medicion (lugar_medicion) values ('Pie de Talud');
+insert into dom.lugar_medicion (lugar_medicion) values ('Dos tercios de talud');
+insert into dom.lugar_medicion (lugar_medicion) values ('Fin del dominio publico');
+
+--OPINION COLINDANTES
+create table dom.opinion_colindantes (id serial, opinion_colindantes varchar(100) primary key);
+insert into dom.opinion_colindantes (opinion_colindantes) values ('De acuerdo');
+insert into dom.opinion_colindantes (opinion_colindantes) values ('No de acuerdo');
+insert into dom.opinion_colindantes (opinion_colindantes) values ('No comparece');
+insert into dom.opinion_colindantes (opinion_colindantes) values ('Pendiente de juicio');
+insert into dom.opinion_colindantes (opinion_colindantes) values ('Llevará al juez');
+
+
+create table dom.modo_obt_linde (id serial, modo_obt_linde varchar(100) primary key);
+insert into dom.modo_obt_linde(modo_obt_linde) values('Estudio de escrituras y cartografia');
+insert into dom.modo_obt_linde(modo_obt_linde) values('Decisión judicial');
+insert into dom.modo_obt_linde(modo_obt_linde) values('Acuerdo entre colindantes');
+
+create table dom.tipo_lin_proyec(id serial, tipo_lin_proyec varchar(100) primary key, ayuda varchar(100));
+insert into dom.tipo_lin_proyec (tipo_lin_proyec, ayuda) values ('Reparcelación','Reparcelación proyectada en un plan de actuación del municipio');
+insert into dom.tipo_lin_proyec (tipo_lin_proyec, ayuda) values ('Límite expropiación futura vía pública', 'La propiedad llegará hasta el límite de la vía pública');
+insert into dom.tipo_lin_proyec (tipo_lin_proyec, ayuda) values ('Límite de dominio público hidráulico', 'Límites de canales, barrancos, ríos, ...');
+insert into dom.tipo_lin_proyec (tipo_lin_proyec, ayuda) values ('Límite monte público', 'Límite dibujado en cartografía pública');
+insert into dom.tipo_lin_proyec (tipo_lin_proyec, ayuda) values ('Límite vía pecuaria', 'Vía pecuaria que no se ve en el terreno pero que está dibujada en alguna cartografía');
+insert into dom.tipo_lin_proyec (tipo_lin_proyec, ayuda) values ('Límite zona protegida', 'Límites dibujados en cartografía de humedales, zonas verdes, ..');
+
+create table dom.tipo_elem_int (id serial, tipo_elem_int varchar(100) primary key);
+insert into dom.tipo_elem_int(tipo_elem_int) values('Edificio');
+insert into dom.tipo_elem_int(tipo_elem_int) values('Porche');
+insert into dom.tipo_elem_int(tipo_elem_int) values('Garaje exterior');
+insert into dom.tipo_elem_int(tipo_elem_int) values('Piscina');
+insert into dom.tipo_elem_int(tipo_elem_int) values('Barbacoa');
+
+create table dom.fecha_dom (id serial primary key, fecha_dom timestamp);
+insert into dom.fecha_dom (fecha_dom) values (current_timestamp);
+--insert into asistencia (fechahora) values ('2008/12/31 13:00:00.59');
+--SET DATESTYLE TO 'European';
+--SET DATESTYLE TO 'DEFAULT';
+--set statement_timeout to 10; aborta las operaciones que duren más de 10 segs.
+--reset statement_timeout;
+--insert into asistencia (fechahora) values ('31/12/2008 13:00:00.59');
+--saber la fecha en postgres SELECT CURRENT_TIMESTAMP;
+--insertar fecha y hora actual insert into comun.varios (fecha_dom) values (current_timestamp);
+-- se inserta con este formato '2008/12/31 13:00:00.59'
+
+create table dom.tipo_colindante (id serial, tipo_colindante varchar(30) primary key);
+insert into dom.tipo_colindante(tipo_colindante) values('Titular catastral');
+insert into dom.tipo_colindante(tipo_colindante) values('Titular registral');
+insert into dom.tipo_colindante(tipo_colindante) values('Arrendatario');
+insert into dom.tipo_colindante(tipo_colindante) values('Acreedor hipotecario');
+
+--tipo_propietario.
+create table dom.tipo_propietario (id serial, tipo_propietario varchar(30) primary key);
+insert into dom.tipo_propietario (tipo_propietario) values('Titular catastral');
+insert into dom.tipo_propietario (tipo_propietario) values('Titular registral');
+insert into dom.tipo_propietario (tipo_propietario) values('Arrendatario');
+insert into dom.tipo_propietario (tipo_propietario) values('Acreedor hipotecario');
+
+--tipo_finca_catastral
+create table dom.tipo_finca_catastral(id serial,tipo_finca_catastral varchar(8) primary key);
+insert into dom.tipo_finca_catastral (tipo_finca_catastral) values('Rústica');
+insert into dom.tipo_finca_catastral (tipo_finca_catastral) values('Urbana');
+
+
+--Tiempo que puede manterner ocupado el servidor cada tipo de usuario, y limite de registros devueltos.
+create table dom.config (id serial primary key, config varchar(3), con_timeout integer not null, statement_timeout integer not null, limite integer not null, tipo_usuario varchar(20) not null unique);
+insert into dom.config (config,con_timeout,statement_timeout,limite,tipo_usuario) values ('cfg',10000,10000,50,'editor');
+insert into dom.config (config,con_timeout,statement_timeout,limite,tipo_usuario) values ('cfg',200000,200000,100,'consultor_autorizado');
+insert into dom.config (config,con_timeout,statement_timeout,limite,tipo_usuario) values ('cfg',1200000,1200000,100000,'admin_propiedad');
+
+--Area minima y perimetro minimo de los poligonos y longitud minima de los lindes.
+create table dom.cfg_tamanos (id serial primary key, cfg_tamanos varchar(3), area_min double precision not null, perim_min double precision not null, lon_min double precision not null,distancia_gap double precision not null, area_err double precision not null,dist_snap_to_grid double precision not null, dist_snap_trabajos double precision not null,tam_pdf_kb integer not null, tam_img_kb integer not null);
+
+insert into dom.cfg_tamanos (cfg_tamanos,area_min,perim_min,lon_min,distancia_gap, area_err,dist_snap_to_grid, dist_snap_trabajos,tam_pdf_kb,tam_img_kb) values 
+                            ('cfg',1,1,0.1,0.05,0.02,0.00001,0.00001,10240,700);
+
+--parcelas_afectadas.namespace
+create table dom.namespace(id serial primary key, namespace varchar unique);
+insert into dom.namespace (namespace) values ('ES.DGCT.CP');
+insert into dom.namespace (namespace) values ('ES.LOCAL.CP');
+
+update dom.fecha_dom set fecha_dom=current_timestamp;
+
+
+
+
+commit;
+
+
+begin;
+
+CREATE OR REPLACE FUNCTION posterior_fecha_dom(fecha_plugin timestamp) RETURNS boolean AS $$
+--Autor: Gaspar Mora Navarro. Universidad Politécnica de Valecncia.
+--Esta funcion devuelve true o false, comprobando si la fecha que se le pasa como
+--parametro (fecha_plugin) es posterior a la fecha que hay en dom.fecha_dom.fecha_dom 
+--   	Devuelve true si es posterior 
+--	Devuelve false si no es posterior 
+--Esta funcion se usa desde el plugin de python para saber si hay que descargar de nuevo
+--los dominios al disco duro, ya que se ha producido algún cambio en alguna tabla de
+--del esquema dom
+
+  DECLARE
+	fecha_dom	timestamp; ---comun.varios.fecha_dom%FIELTYPE;
+	fila_varios	dom.fecha_dom%ROWTYPE;
+ 	cur 		refcursor;
+  BEGIN
+     	open cur for execute 'select * from dom.fecha_dom'; 
+
+--actualizar la fecha de los dominios
+--UPDATE dom.fecha_dom set fecha_dom=current_timestamp;
+
+	FETCH cur INTO fila_varios;
+	fecha_dom := fila_varios.fecha_dom;
+	if fecha_dom > fecha_plugin then
+		return true;
+	else
+		return false;
+	end if;
+     	CLOSE cur;
+  END;
+$$ LANGUAGE 'plpgsql';
+
+commit;

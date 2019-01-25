@@ -1,0 +1,97 @@
+begin;
+
+CREATE OR REPLACE FUNCTION script.acceso_trabajo() RETURNS trigger AS $$
+/*
+	Autor: Gaspar Mora Navarro. Universidad Politécnica de Valencia.
+	Este disparador se usa en todas las tablas edición, es
+	decir, en todas las tablas del los esquemas que comienzan por ed_,
+	salvo la tabla ed_comun.ed_trabajos, que tiene su propio disparador, 
+
+	Se ejecuta ante cualquier modificación insert, delete, update.
+ 	Se comprueba que, quien va a modificar la tabla es
+	administrador de los trabajos, o es el autor del trabajo.
+		- No se puede cambiar el id_trabajo en ninguna tabla, ni el administrador, 
+			ni el propietario.
+		- Si es administrador puede realizar los cambios que estime oportunos.
+		- Si es usuario editor entonces solo podra
+			 insertar o modificar la tabla si creó él mismo el trabajo.
+*/
+  DECLARE
+	consulta varchar;
+	autor varchar;--autor del trabajo que se quiere modificar
+	tipo_usu varchar;--tipo de usuario que está trabajando
+	id_trab_actual integer;--id del trabajo que quiere modificar
+  BEGIN
+
+	--para que no pueda cambiar el identificador del trabajo
+	if TG_OP='UPDATE' then
+		if NEW.id_trabajo <> OLD.id_trabajo then
+			raise exception 'No puede cambiar el identificador del trabajo';
+		end if;
+	end if;	
+	
+	consulta:= 'select tipo_usuario from comun.usuarios where usuario=$1';
+	execute consulta into tipo_usu using session_user;
+
+	--raise warning 'El usuario actual es %', session_user;
+	--raise warning 'El tipo de usuario actual es %', tipo_usu;
+	--raise warning 'Nombre de tabla %',TG_TABLE_NAME;
+
+	--si no esta en la tabla comun.usuarios no puede continuar
+
+	if tipo_usu is null then
+		raise exception 'El usuario actual (%) no esta dado de alta con la aplicacion UPV-DelProp. 
+No tiene acceso a las tablas. Pongase en contacto con el adminsitrador.',session_user;
+	end if;
+
+	if tipo_usu = 'admin_propiedad' then
+		if TG_OP='INSERT' or TG_OP='UPDATE' then
+			--raise notice 'Aceptado con NEW. Tipo usuario admin_propiedad';
+			return NEW;
+		else
+			--raise notice 'Aceptado con OLD. Tipo usuario admin_propiedad';
+			return OLD;
+        	end if;
+	end if;
+
+	--raise notice 'Operacion %',TG_OP;
+	if TG_OP='INSERT' then
+		id_trab_actual=NEW.id_trabajo;
+	else	
+		id_trab_actual=OLD.id_trabajo;
+	end if;
+
+	--Selecciono el autor del trabajo
+	consulta:= 'select usuario from ed_comun.ed_trabajos where id_trabajo=$1';
+	execute consulta into autor using id_trab_actual;
+	--raise warning 'Consulta %',consulta;
+	--raise warning 'Autor % ', autor;
+
+	if autor is null then --No puede ser null ya que el campo es not null. Si es null es porque el editor
+			      --está borrando el trabajo y ya se ha eliminado el registro de la tabla trabajos
+		if TG_OP='DELETE' THEN
+			return OLD;
+		else
+			raise exception 'El trabajo actual (%) no tiene autor. Pongase en contacto con el administrador.',id_trab_actual;
+		end if;
+	end if;
+
+	--raise notice 'Autor del trabajo %',autor;
+	--si el autor es el usuario actual permite realizar la operación
+	if autor=session_user then		
+		if TG_OP='INSERT' or TG_OP='UPDATE' then
+			--raise notice 'Aceptado con NEW al final';
+			return NEW;
+		else
+			--raise notice 'Aceptado con OLD al final';
+			--se permite el borrado
+			return OLD;
+		end if;
+	else
+		--raise notice 'No Aceptado';
+		raise exception 'El usuario actual (%) no es el autor del trabajo que quiere consultar. No tiene acceso a los datos del trabajo. Pongase en contacto con el administrador.',session_user;
+	end if;
+  END;
+$$ LANGUAGE 'plpgsql';
+
+commit;

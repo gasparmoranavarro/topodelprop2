@@ -1,0 +1,69 @@
+begin;
+
+CREATE OR REPLACE FUNCTION script.comprueba_tama(geom geometry, VariaDic params double precision[]) RETURNS boolean AS $$
+
+/*Autor: Gaspar Mora Navarro. Universidad Politécnica de Valecncia.
+Se puede aplicar a polígonos, multipoligonos o lineStrings.
+Realiza las siguientes comprobaciones:
+	- En el caso de poligonos, o multipoligonos:
+		- Que el area no sea menor que area_min
+		- Que el perimetro no sea menor que long_min
+	- En el caso de lineStrings
+		- Que la longitud no sea menos que loong_min
+Si alguna de las tres condiciones anteriores no es cierta, genera un error. En caso
+contrario, devuelve true.
+	- params pueden ser uno o dos parámetros separados por comas.
+		- Si es uno se toma como longitud maxima del linestring
+		- Si son dos, se toman como area y perímetros minimos del polígono
+		- Ejemplos:
+			Para linestrings: script.comprueba_tama(geom,10); --long 10
+			Para poligonos: script.comprueba_tama(geom,20,10); --area 20, perim 10 
+
+*/
+  DECLARE
+	n integer;
+	area_min double precision;
+	long_min double precision;
+	tipo_geom varchar;
+	area double precision;
+	lon double precision;
+  BEGIN
+	n:=array_length(params,1);
+	if n < 1 then
+		raise exception 'El numero total de parametros para usar la funcion debe ser dos o tres';
+	end if;
+	if n > 2 then
+		raise exception 'El numero total de parametros para usar la funcion debe ser dos o tres';
+	end if;
+	if n=1 then
+		long_min=params[1];
+	else
+		area_min=params[2];
+		long_min=params[1];
+	end if;
+	tipo_geom:=ST_GeometryType(geom);
+
+	if 'ST_Polygon' = tipo_geom or 'ST_MultiPolygon' = tipo_geom then
+		area:=st_area(geom);
+		lon:=ST_Perimeter(geom);
+
+		if area < area_min then
+			raise exception 'El area del poligono es %. El area minima es %',area,area_min;
+		end if;
+		if lon < long_min then
+			raise exception 'El perimetro del poligono es %. El perimetro minimo es %',lon,long_min;
+		end if;
+
+	elsif 'ST_LineString' = tipo_geom then
+		lon:=ST_Length(geom);
+		if lon < long_min then
+			raise exception 'La longitud del arco es %. La longitud minima es %',lon,long_min;
+		end if;		
+	else
+		raise exception 'Error en script.comprueba_tama: el tipo de geometria es %. Solo se soportan los tipos ST_Linestring, ST_Polygon o ST_MultiPolygon', tipo_geom;
+	end if;
+	return true;
+  END;
+$$ LANGUAGE 'plpgsql';
+
+commit;

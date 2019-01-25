@@ -1,0 +1,86 @@
+begin;
+
+CREATE OR REPLACE FUNCTION script.geom_servid_ei() RETURNS trigger AS $$
+/*
+	Autor: Gaspar Mora Navarro. Universidad Politécnica de Valencia.
+	Este disparador se usa en las tablas ed_servidumbres, servidumbres, ed_elem_interiores, elem_interiores
+
+	Comprueba que la servidumbre o el elemento interior esté completamente contenido en la finca.
+	Dos servidumbres o dos elementos interiores tampoco pueden superponerse. En este caso se da un mensaje con la geometria de intersección.
+*/
+  DECLARE
+
+	geom_finca geometry;
+	geom_int geometry;
+	geom_int_wkt varchar;
+	consulta varchar;
+	tabla_fincas varchar;
+	n_filas integer;
+	resp boolean;
+	dimension_int integer;
+	nom_tabla_comprobar varchar;
+
+  BEGIN
+
+	if TG_OP='UPDATE' then
+		if ST_Equals(NEW.geom,OLD.geom) then
+			return NEW;
+		end if;
+	end if;
+
+	if not(TG_TABLE_NAME='ed_servidumbres' or  TG_TABLE_NAME='servidumbres'  or TG_TABLE_NAME='ed_elem_interiores' or TG_TABLE_NAME='elem_interiores') then
+		raise exception 'Este disparador solo se puede usar con las tablas ed_elem_interiores, elem_interiores, ed_servidumbres o ed_servidumbres';
+	end if;
+	
+	if TG_TABLE_NAME='ed_servidumbres' or TG_TABLE_NAME='ed_elem_interiores' then
+		tabla_fincas:=TG_TABLE_SCHEMA || '.ed_fincas';
+	else
+		tabla_fincas:=TG_TABLE_SCHEMA || '.fincas';
+	end if;
+
+	consulta:='select geom from ' || tabla_fincas || ' where id_trabajo=$1';
+		--el campo fincas.id_trabajo es unique, solo puede seleccionar una geometria
+	
+	execute consulta into geom_finca using NEW.id_trabajo;
+
+	GET DIAGNOSTICS n_filas = ROW_COUNT;
+	
+	if n_filas=0 then
+		raise exception 'No puede insertar servidumbres o elementos interiores sin primero insertar la finca.';
+	elsif geom_finca is null then
+		raise exception 'No puede insertar servidumbres o elementos interiores sin primero insertar la finca. El finca es null';
+	end if;
+
+	if new.geom is null then
+		raise exception 'La geometria de servidumbre o el elemento interior no puede ser null';
+	end if;
+
+	NEW.geom:=script.comprueba_geom(NEW.geom);--comprueba que es simple, hace el snap_togrid
+	
+	consulta:='select st_covers($1,$2)';
+	execute consulta into resp using geom_finca,new.geom;
+
+	if resp = false then
+		raise exception 'La servidumbre o el elemento interior que quiere insertar no esta completamente dentro de la finca de este trabajo';
+	end if;
+
+
+	nom_tabla_comprobar=TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME;
+
+	consulta:= 'select script.stx_extract(st_intersection($1,t1.geom),$2) from ' || nom_tabla_comprobar || ' t1 where t1.geom && $1 and st_relate (t1.geom, $1, ''T********'') and t1.id_trabajo=$3 and t1.gid<>$4';
+
+	dimension_int:=2;
+	execute consulta into geom_int using NEW.geom,dimension_int,NEW.id_trabajo,new.gid;
+
+	if geom_int is null then
+		return new;
+	else
+		geom_int_wkt:=st_astext(geom_int);
+		raise exception 'La geometria intersecta con otra geometria en la capa %. La interseccion es:
+ %',nom_tabla_comprobar, geom_int_wkt;
+	end if;
+
+  END;
+$$ LANGUAGE 'plpgsql';
+
+commit;

@@ -1,0 +1,140 @@
+# -*- coding: utf-8 -*-
+
+# Form implementation generated from reading ui file 'C:/Qgs18/apps/qgis/python/plugins/TopoDelProp/forms_ui/frmIntrodDatos.ui'
+#
+# Created: Fri Nov 09 12:38:15 2012
+#      by: PyQt4 UI code generator 4.8.6
+#
+# WARNING! All changes made in this file will be lost!
+
+from PyQt4 import QtCore, QtGui
+
+try:
+    _fromUtf8 = QtCore.QString.fromUtf8
+except AttributeError:
+    _fromUtf8 = lambda s: s
+
+class Ui_frmIntrodDatos(object):
+    def setupUi(self, frmIntrodDatos):
+        frmIntrodDatos.setObjectName(_fromUtf8("frmIntrodDatos"))
+        frmIntrodDatos.setWindowModality(QtCore.Qt.NonModal)
+        frmIntrodDatos.resize(975, 591)
+        frmIntrodDatos.setWindowTitle(QtGui.QApplication.translate("frmIntrodDatos", "TopoDelProp. Introducción de datos de: ", None, QtGui.QApplication.UnicodeUTF8))
+        frmIntrodDatos.setModal(False)
+        self.tableWidget = QtGui.QTableWidget(frmIntrodDatos)
+        self.tableWidget.setGeometry(QtCore.QRect(10, 40, 741, 371))
+        self.tableWidget.setToolTip(QtGui.QApplication.translate("frmIntrodDatos", "Pinche sobre el campo a rellenar", None, QtGui.QApplication.UnicodeUTF8))
+        self.tableWidget.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
+        self.tableWidget.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
+        self.tableWidget.setAutoScroll(True)
+        self.tableWidget.setAutoScrollMargin(0)
+        self.tableWidget.setVerticalScrollMode(QtGui.QAbstractItemView.ScrollPerPixel)
+        self.tableWidget.setHorizontalScrollMode(QtGui.QAbstractItemView.ScrollPerPixel)
+        self.tableWidget.setCornerButtonEnabled(True)
+        self.tableWidget.setRowCount(5)
+        self.tableWidget.setColumnCount(2)
+        self.tableWidget.setObjectName(_fromUtf8("tableWidget"))
+        self.tableWidget.horizontalHeader().setCascadingSectionResizes(False)
+        self.tableWidget.horizontalHeader().setStretchLastSection(False)
+        self.tableWidget.verticalHeader().setVisible(True)
+        self.tableWidget.verticalHeader().setCascadingSectionResizes(False)
+        self.tableWidget.verticalHeader().setHighlightSections(True)
+        self.listWidget = QtGui.QListWidget(frmIntrodDatos)
+        self.listWidget.setGeometry(QtCore.QRect(750, 70, 221, 341))
+        self.listWidget.setToolTip(QtGui.QApplication.translate("frmIntrodDatos", "Seleccione el valor a introducir en la tabla", None, QtGui.QApplication.UnicodeUTF8))
+        self.listWidget.setStatusTip(_fromUtf8(""))
+        self.listWidget.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOn)
+        self.listWidget.setAutoScroll(True)
+        self.listWidget.setAlternatingRowColors(True)
+        self.listWidget.setHorizontalScrollMode(QtGui.QAbstractItemView.ScrollPerItem)
+        self.listWidget.setObjectName(_fromUtf8("listWidget"))
+        self.bttGuardar = QtGui.QPushButton(frmIntrodDatos)
+        self.bttGuardar.setGeometry(QtCore.QRect(730, 420, 131, 31))
+        self.bttGuardar.setToolTip(QtGui.QApplication.translate("frmIntrodDatos", "Guarda los cambios del elemento", None, QtGui.QApplication.UnicodeUTF8))
+        self.bttGuardar.setText(QtGui.QApplication.translate("frmIntrodDatos", "Guardar cambios", None, QtGui.QApplication.UnicodeUTF8))
+        self.bttGuardar.setObjectName(_fromUtf8("bttGuardar"))
+        self.bttTerminar = QtGui.QPushButton(frmIntrodDatos)
+        self.bttTerminar.setGeometry(QtCore.QRect(860, 420, 111, 31))
+        self.bttTerminar.setToolTip(QtGui.QApplication.translate("frmIntrodDatos", "Termina la introduccion de datos del elemento", None, QtGui.QApplication.UnicodeUTF8))
+        self.bttTerminar.setText(QtGui.QApplication.translate("frmIntrodDatos", "Terminar", None, QtGui.QApplication.UnicodeUTF8))
+        self.bttTerminar.setObjectName(_fromUtf8("bttTerminar"))
+        self.label = QtGui.QLabel(frmIntrodDatos)
+        self.label.setGeometry(QtCore.QRect(10, 10, 221, 16))
+        self.label.setText(QtGui.QApplication.translate("frmIntrodDatos", "Datos del elemento. Elija un campo:", None, QtGui.QApplication.UnicodeUTF8))
+        self.label.setObjectName(_fromUtf8("label"))
+        self.lbLista = QtGui.QLabel(frmIntrodDatos)
+        self.lbLista.setGeometry(QtCore.QRect(750, 20, 201, 16))
+        self.lbLista.setText(QtGui.QApplication.translate("frmIntrodDatos", "Valores del campo seleccionado:", None, QtGui.QApplication.UnicodeUTF8))
+        self.lbLista.setObjectName(_fromUtf8("lbLista"))
+        self.lbEstado = QtGui.QLabel(frmIntrodDatos)
+        self.lbEstado.setGeometry(QtCore.QRect(10, 490, 951, 101))
+        self.lbEstado.setText(_fromUtf8(""))
+        self.lbEstado.setObjectName(_fromUtf8("lbEstado"))
+        self.tbId_trabajo = QtGui.QLineEdit(frmIntrodDatos)
+        self.tbId_trabajo.setEnabled(False)
+        self.tbId_trabajo.setGeometry(QtCore.QRect(120, 420, 121, 22))
+        self.tbId_trabajo.setReadOnly(False)
+        self.tbId_trabajo.setObjectName(_fromUtf8("tbId_trabajo"))
+        self.tbSrc_trabajo = QtGui.QLineEdit(frmIntrodDatos)
+        self.tbSrc_trabajo.setEnabled(False)
+        self.tbSrc_trabajo.setGeometry(QtCore.QRect(120, 440, 121, 22))
+        self.tbSrc_trabajo.setReadOnly(False)
+        self.tbSrc_trabajo.setObjectName(_fromUtf8("tbSrc_trabajo"))
+        self.label_2 = QtGui.QLabel(frmIntrodDatos)
+        self.label_2.setGeometry(QtCore.QRect(20, 420, 81, 16))
+        self.label_2.setText(QtGui.QApplication.translate("frmIntrodDatos", "ID del trabajo:", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_2.setObjectName(_fromUtf8("label_2"))
+        self.label_3 = QtGui.QLabel(frmIntrodDatos)
+        self.label_3.setGeometry(QtCore.QRect(20, 440, 101, 16))
+        self.label_3.setText(QtGui.QApplication.translate("frmIntrodDatos", "SRC del trabajo:", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_3.setObjectName(_fromUtf8("label_3"))
+        self.bttEditar = QtGui.QPushButton(frmIntrodDatos)
+        self.bttEditar.setGeometry(QtCore.QRect(640, 420, 91, 31))
+        self.bttEditar.setText(QtGui.QApplication.translate("frmIntrodDatos", "Editar", None, QtGui.QApplication.UnicodeUTF8))
+        self.bttEditar.setObjectName(_fromUtf8("bttEditar"))
+        self.bttBuscar = QtGui.QPushButton(frmIntrodDatos)
+        self.bttBuscar.setGeometry(QtCore.QRect(490, 420, 71, 31))
+        self.bttBuscar.setText(QtGui.QApplication.translate("frmIntrodDatos", "Buscar", None, QtGui.QApplication.UnicodeUTF8))
+        self.bttBuscar.setObjectName(_fromUtf8("bttBuscar"))
+        self.bttDescargar = QtGui.QPushButton(frmIntrodDatos)
+        self.bttDescargar.setGeometry(QtCore.QRect(270, 420, 121, 31))
+        self.bttDescargar.setText(QtGui.QApplication.translate("frmIntrodDatos", "Descargar archivo", None, QtGui.QApplication.UnicodeUTF8))
+        self.bttDescargar.setObjectName(_fromUtf8("bttDescargar"))
+        self.bttNuevo = QtGui.QPushButton(frmIntrodDatos)
+        self.bttNuevo.setGeometry(QtCore.QRect(560, 420, 81, 31))
+        self.bttNuevo.setText(QtGui.QApplication.translate("frmIntrodDatos", "Nuevo", None, QtGui.QApplication.UnicodeUTF8))
+        self.bttNuevo.setObjectName(_fromUtf8("bttNuevo"))
+        self.txtFiltrar = QtGui.QLineEdit(frmIntrodDatos)
+        self.txtFiltrar.setGeometry(QtCore.QRect(750, 40, 221, 31))
+        self.txtFiltrar.setObjectName(_fromUtf8("txtFiltrar"))
+        self.bttBorrar = QtGui.QPushButton(frmIntrodDatos)
+        self.bttBorrar.setGeometry(QtCore.QRect(390, 420, 101, 31))
+        self.bttBorrar.setToolTip(QtGui.QApplication.translate("frmIntrodDatos", "Borra este registro", None, QtGui.QApplication.UnicodeUTF8))
+        self.bttBorrar.setText(QtGui.QApplication.translate("frmIntrodDatos", "Borrar ", None, QtGui.QApplication.UnicodeUTF8))
+        self.bttBorrar.setObjectName(_fromUtf8("bttBorrar"))
+        self.tbMunicipio = QtGui.QLineEdit(frmIntrodDatos)
+        self.tbMunicipio.setEnabled(False)
+        self.tbMunicipio.setGeometry(QtCore.QRect(120, 460, 381, 22))
+        self.tbMunicipio.setReadOnly(False)
+        self.tbMunicipio.setObjectName(_fromUtf8("tbMunicipio"))
+        self.label_4 = QtGui.QLabel(frmIntrodDatos)
+        self.label_4.setGeometry(QtCore.QRect(20, 460, 101, 16))
+        self.label_4.setText(QtGui.QApplication.translate("frmIntrodDatos", "Municipio:", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_4.setObjectName(_fromUtf8("label_4"))
+
+        self.retranslateUi(frmIntrodDatos)
+        QtCore.QMetaObject.connectSlotsByName(frmIntrodDatos)
+
+    def retranslateUi(self, frmIntrodDatos):
+        pass
+
+
+if __name__ == "__main__":
+    import sys
+    app = QtGui.QApplication(sys.argv)
+    frmIntrodDatos = QtGui.QDialog()
+    ui = Ui_frmIntrodDatos()
+    ui.setupUi(frmIntrodDatos)
+    frmIntrodDatos.show()
+    sys.exit(app.exec_())
+

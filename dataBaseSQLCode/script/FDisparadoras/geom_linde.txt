@@ -1,0 +1,108 @@
+begin;
+
+CREATE OR REPLACE FUNCTION script.geom_linde() RETURNS trigger AS $$
+/*
+	Autor: Gaspar Mora Navarro. Universidad Politécnica de Valencia.
+	Este disparador se usa en la tabla ed_srcXXXXX.ed_lindes o srcXXXXX.lindes antes de INSERT or UPDATE.
+	Impide que se inserte un linde que:
+		- no este completamente sobre el perimetro de su finca
+		- Se superponga con otro linde de la capa ed_lindes
+		- Se superponga con otro linde de la capa lindes
+	
+	
+	Utiliza la funcion script.comprueba_covers y script.comprueba_overlaps_geom
+		script.comprueba_geom 
+*/
+  DECLARE
+	geom_finca geometry;
+	geom_linde geometry;
+	geom_int geometry;
+	geom_int_wkt varchar;
+	consulta varchar;
+	tabla_fincas varchar;
+	tabla_lindes_ed varchar;
+	tabla_lindes varchar;
+	n_filas integer;
+	resp boolean;
+
+  BEGIN
+
+	if TG_OP='UPDATE' then
+		if ST_Equals(NEW.geom,OLD.geom) then
+			return NEW;
+		end if;
+	end if;
+
+	if TG_TABLE_NAME='ed_lindes' then
+		tabla_fincas:=TG_TABLE_SCHEMA || '.' || 'ed_fincas';
+	elsif TG_TABLE_NAME='lindes' then
+		tabla_fincas:=TG_TABLE_SCHEMA || '.' || 'fincas';
+	else
+		raise exception 'Este disparador solo se puede usar con las tablas lindes o ed_lindes';
+	end if;
+
+	consulta:='select geom from ' || tabla_fincas || ' where id_trabajo=$1';
+		--el campo fincas.id_trabajo es unique, solo puede seleccionar una geometria
+	execute consulta into geom_finca using NEW.id_trabajo;
+
+	GET DIAGNOSTICS n_filas = ROW_COUNT;
+	
+	if n_filas=0 then
+		raise exception 'No puede insertar los lindes de la finca antes que la finca';
+	elsif geom_finca is null then
+		raise exception 'No puede insertar los lindes de la finca. La finca de este trabajo es null';
+	end if;
+	if new.geom is null then
+		raise exception 'La geometria del linde no puede ser null';
+	end if;
+	NEW.geom:=script.comprueba_geom(NEW.geom);--comprueba que es simple, hace el snap_togrid
+
+	resp:=script.comprueba_covers(geom_finca,NEW.geom);--devuelve true en el caso de que el linde este sobre
+			--el contorno de la finca.
+	if resp = false then
+		raise exception 'El linde no esta sobre el contorno de la finca. 
+Debe tener exactamente los mismos vertices que el perimetro de la finca que ocupa';
+	end if;
+
+--SUPERPOSICION CON OTROS LINDES
+	if TG_TABLE_NAME='ed_lindes' then
+		tabla_lindes_ed:=TG_TABLE_SCHEMA || '.ed_lindes';
+		tabla_lindes:=substring(TG_TABLE_SCHEMA from 4) || '.lindes';
+		
+		--veamos si intersecta con otro linde existente en src_XXXXX.lindes
+		geom_int:=script.comprueba_overlaps_geom(NEW.geom,tabla_lindes,1,-1);--se excluye el gid del del
+			--linde ya que estan en capas diferentes
+
+
+		if not(geom_int is null) then
+			geom_int_wkt:=st_astext(geom_int);
+			raise exception 'El linde intersecta con otro en la capa %. La interseccion es:
+ 				%',tabla_lindes,geom_int_wkt;
+		end if;
+	
+		--si la tabla es de edicion, se comprueba tambien que no se superpone con ningun
+			--otro linde de edicion
+		geom_int:=script.comprueba_overlaps_geom(NEW.geom,tabla_lindes_ed,1,new.gid);
+		if not(geom_int is null) then
+			geom_int_wkt:=st_astext(geom_int);
+			raise exception 'El linde intersecta con otro en la capa %. 
+La interseccion es: %',tabla_lindes,geom_int_wkt;
+		end if;
+	else
+		tabla_lindes:=TG_TABLE_SCHEMA || '.lindes';
+		--veamos si intersecta con otro linde existente en src_XXXXX.lindes
+		geom_int:=script.comprueba_overlaps_geom(NEW.geom,tabla_lindes,1,new.gid);--se excluye el gid del
+ 			--elemento, para que no se comprebe la interseccion con el mismo
+	
+		if not(geom_int is null) then
+			geom_int_wkt:=st_astext(geom_int);
+			raise exception 'El linde intersecta con otro en la capa %. La interseccion es:
+ 				%',tabla_lindes,geom_int_wkt;
+		end if;
+	end if;	
+
+	return NEW;
+  END;
+$$ LANGUAGE 'plpgsql';
+
+commit;

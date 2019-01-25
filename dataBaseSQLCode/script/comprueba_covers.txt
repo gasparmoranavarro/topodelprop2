@@ -1,0 +1,32 @@
+begin;
+
+CREATE OR REPLACE FUNCTION script.comprueba_covers(geom_abajo geometry,geom_arriba geometry) RETURNS boolean AS $$
+/*Autor: Gaspar Mora Navarro. Universidad Politécnica de Valecncia.
+
+	* Recibe dos geometrias y comprueba que:
+		- Si geom_abajo es un poligono, o multipoligono se obtiene su contorno y se comprueba si la geometria geom_arriba esta completamente en el contorno. Si hay una parte de geom_arriba que no esta sobre el contorno devuelve false. Si esta completamente encima, devuelve true.
+		- Si geom_abajo es un linestring, o punto, se comprueba si geom_arriba esta completamente dentro del interior de geom_abajo.
+	* Esta funcion solo tiene sentido si la geometria de geom_abajo tiene iguales o mayores dimensiones que la geometria geom_arriba. En caso contrario, devuelve false.
+
+*/
+
+DECLARE
+	--geom_pol geometry;
+	--geom_lin geometry;
+	cons varchar;
+	resp boolean;
+BEGIN
+	--geom_pol:=st_multi(st_geomfromtext('POLYGON ((10 20,15 15, 20 20, 15 30,10 20))',25830));
+	--geom_lin:=st_multi(st_geomfromtext('LINESTRING (10 20, 15 16, 20 20)',25830));
+	
+	if geometrytype(geom_abajo)='POLYGON' OR geometrytype(geom_abajo)='MULTIPOLYGON' THEN
+		cons:='select st_covers(st_boundary($1),$2)';
+	else
+		cons:='select st_covers($1,$2)';
+	end if;
+	execute cons into resp using geom_abajo,geom_arriba;
+	return resp;
+  END;
+$$ LANGUAGE 'plpgsql';
+
+commit;

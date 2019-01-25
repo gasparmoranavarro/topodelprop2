@@ -1,0 +1,123 @@
+begin;
+
+CREATE OR REPLACE FUNCTION script.comprueba_gaps(geom geometry,nom_tabla_comprobar varchar,nom_tabla_gaps varchar, distancia_gap double precision, nom_campo varchar,valor_campo integer, VariaDic gid_excluir integer[]) RETURNS boolean AS $$
+/*Autor: Gaspar Mora Navarro. Universidad Politécnica de Valecncia.
+
+	* Recibe una geometria, una tabla (A) y otra capa para insertar los errores (B), si hay. Tambien recibe el nombre de un campo de tipo entero y su valor, para ser insertado en la tabla (B). Este campo esta destinado a almacenar algun identificador.
+
+	* Busca gaps, es decir, zonas del perimetro de geom que no toquen otros perimetros de los poligonos de la tabla A. Si hay gaps, se insertan en la tabla (B).
+	* El parametro distancia_gap, se utiliza en el caso de que el poligono geom no toque ninguna otra geometria. Es un poligono aislado. Si el poligono no tiene ningun otro poligono más cerca de distancia_gap, no sera marcado como error gap.
+
+Parametros:
+geom: geometria a comprobar, debe ser de tipo poligono o multipoligono.
+nom_tabla_comprobar: nombre de la tabla sobre la que se comprueba geom
+nom_tabla_gaps: es la tabla de salida, en el caso de haber partes del perimetro de geom que no esten tocadas por los perimetros de la capa nom_tabla_comprobar.
+distancia_gap: se utiliza en el caso de que el poligono geom no toque ninguna otra geometria. Es un poligono aislado. Si el poligono no tiene ningun otro poligono más cerca de distancia_gap, no sera marcado como error gap.
+nom_campo: nombre de un campo de tipo entero de la tabla nom_tabla_gaps
+valor_campo: valor entero a insertar en nom_tabla_overlaps.nom_campo
+gid_excluir: gid de la geometria que no se quiere que se compruebe. Es obligatorio, si se quieren comprobar todas, introducir -1.
+Devuelve false si no hay solape true si hay solape, y en este caso también inserta un registro en la tabla nom_tabla_gaps
+
+	Ejemplo de uso 
+		respuesta:= script.comprueba_gaps(geom,'parcelas','huecos',1,'id_trabajo',10, -1);
+			geom-->la geometría que se quiere comprobar si tiene huecos con otras geometrías de la capa parcelas
+			'parcelas'-->La capa con la que se comprueba si hay huecos con la geometria geom
+			'huecos'-->Capa de tipo linestring donde se insertan las líneas que indican los huecos
+			1-->Si el polígono es aislado, si tiene posígonos a más de un metro, no se dibuja el contorno, si tiene a menos de un metro, sí se dibuja.
+				Poner siempre a 1 m este parámetro. No tiene mucha importancia.
+			'id_trabajo'-->Nombre de un campo que existe en la tabla huecos, que se usa para almacenar el valor 10, que es el siguiente parámetro.
+				Esto se usa para saber cuál es el origen de cada línea dibujada en la capa huecos, en concreto para saber el trabajo del que proviene el hueco
+			10-->Valor que se inserta en el campo id_trabajo de la tabla huecos.
+			-1-->Dejar siempre este valor.
+*/
+DECLARE
+	consulta1 varchar;
+	consulta2 varchar;
+	consulta3 varchar;
+	consulta4 varchar;
+    	consulta_ins varchar;
+	geom_int geometry;
+	geom_gap geometry;
+    	geom_gap_def geometry;
+    	geom_gap_ins geometry;
+    	v_geoms geometry_dump[];
+    	g_dump geometry_dump;
+    	n_geoms integer;
+    	registro record;
+	n integer;
+	gid_ex integer;
+BEGIN
+	n:=array_length(gid_excluir,1);
+	if n > 0 then
+		gid_ex:=gid_excluir[1];
+		consulta1:='select script.stx_extract(st_collect(st_intersection(st_boundary($1),t1.geom)),1) from ' || nom_tabla_comprobar || ' t1 where t1.gid <> $2 and st_intersects($1,t1.geom)';
+        --interseccion del perimetro con los otros poligonos
+		execute consulta1 into geom_int using geom,gid_ex;
+	else
+		consulta1:='select script.stx_extract(st_collect(st_intersection(st_boundary($1),t1.geom)),1) from ' || nom_tabla_comprobar || ' t1 where st_intersects($1,t1.geom)';
+        --interseccion del perimetro con los otros poligonos
+		execute consulta1 into geom_int using geom;
+	end if;
+	
+
+	if geom_int is null then
+		--no hay perimetro comun, el poligono esta solitario. Es todo el perimetro el que no toca con nada.
+		geom_gap:=st_boundary(geom);
+	else
+		consulta2:='select  script.stx_extract(st_difference(st_boundary($1),$2),1)';--diferencia de del perimetro de la geometria con
+		--geom_int, que son los arcos donde hay contacto. Resultam los arcos donde no hay contacto
+		execute consulta2 into geom_gap using geom, geom_int;
+	end if;
+
+	if geom_gap is null then
+		--no hay huecos
+        	raise notice 'geom_gap es null';
+		return false;
+	elsif st_length(geom_gap) < 0.0001 then
+		-- no hay huecos
+        	--raise notice 'El hueco es menor de 0.0001';
+		return false;
+	else
+
+
+/*
+		--Obtengo la porcion de los perimetros de los polígonos cuya la distancia desde geom_gap a ellos es menor de distancia_gap.
+        consulta3:='select
+        script.stx_extract(
+            st_collect(
+                st_intersection(
+                    st_boundary(t1.geom),
+                    st_buffer($1,$2)
+                )
+            )
+            ,1
+        ) from ' || nom_tabla_comprobar || ' t1 where st_intersects($1,t1.geom)';
+
+		execute consulta3 into geom_int using geom_gap,distancia_gap;
+
+    end if;
+
+    --si no hay intersección desde geom_gap a los polígonos de alrededor es que es una geometria aislada.Es correcto
+    if geom_int is null then
+        return false;
+    elsif st_isEmpty(geom_int) then
+        return false;
+    elsif st_length(geom_int) < 0.0001 then
+        return false;
+    end if;
+	--Si que hay intersección desde geom_gap a los polígonos de alrededor a menos distancia de geom_gap	
+*/
+ 
+
+   
+    		consulta_ins:='insert into ' || nom_tabla_gaps || ' (geom,' || quote_ident(nom_campo) ||' ) values ($1,$2)';
+    		--raise notice 'consulta insert: %',consulta_ins;
+    		execute consulta_ins using geom_gap, valor_campo;
+	end if;
+
+    return true;
+
+  END;
+$$ LANGUAGE 'plpgsql';
+
+commit;

@@ -1,0 +1,11 @@
+create schema src25830;
+create schema ed_src25830;
+
+--crea las tablas espaciales
+\i c:/delprop/cbd/v2/def/3src25830.txt
+\i c:/delprop/cbd/v2/edicion/3edSrc25830.txt
+
+
+--crea los disparadores sobre las tablas espaciales
+\i c:/delprop/cbd/script/fdisparadoras/crea_disparadores_25830.txt
+

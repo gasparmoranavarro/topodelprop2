@@ -1,0 +1,56 @@
+begin;
+CREATE OR REPLACE FUNCTION script.comp_gaps_finca_ed(src varchar, id_trabajo integer) RETURNS boolean AS $$
+/*
+
+Autor: Gaspar Mora Navarro. Universidad Politécnica de Valencia.
+
+Para una finca ya insertada en una capa de edicion de fincas, cuyo id_trabajo coincida
+ dibuja los gaps, si los hay
+en la capa ed_gaps_fincas y devuelve true. Si no hay gaps, devuelve false.
+Si la geometria no existe, es vacia, o no es correcta, genera una excepcion.
+
+Previamente borra los errores anteriores del trabajo, si los habia
+
+*/
+DECLARE
+	resp boolean;
+	geom_finca geometry;
+	dis_gap double precision;
+	nom_tabla_fincas_ed varchar;
+	nom_tabla_fincas_def varchar;
+	nom_tabla_gaps varchar;--nombre de la tabla espacial de los gaps
+	consulta varchar;
+	geom_temp geometry;
+BEGIN
+	nom_tabla_fincas_ed:='ed_src' || src || '.ed_fincas';
+	nom_tabla_fincas_def:='src' || src || '.fincas';
+	nom_tabla_gaps:='ed_src' || src ||'.ed_gaps_fincas';
+
+	consulta:='select geom from ' || nom_tabla_fincas_ed || ' t1 where t1.id_trabajo=$1'; 
+	execute consulta into geom_finca using id_trabajo;
+	
+	geom_temp:=script.comprueba_geom(geom_finca);--genera error si es null, empty,...
+
+	select distancia_gap into dis_gap from dom.cfg_tamanos where id >-1;
+
+	if not found then
+		raise exception 'Error en comp_gaps_finca_ed: La consulta select area_min, perim_min into area_m, peri_m from dom.cfg_tamanos where id=1 no produjo ningun resultado';
+	end if;
+
+	resp:=script.borra_gaps_finca_ed(src, id_trabajo);
+
+	resp:=script.comprueba_gaps(geom_finca, nom_tabla_fincas_def, nom_tabla_gaps, dis_gap,'id_trabajo', id_trabajo,-1);--si hay porciones de perímetro,
+				--de la geometria sin estar pegados a los poligonos de nom_tabla_fincas_def
+				--se dibujan los arcos erroneos sobre la capa nom_tabla_gaps
+				--y devuelve true, pero el registro se puede insertar, ya que no se sabe
+				--si es error o no.
+
+	if resp=true then
+		return true;
+	end if;
+
+	return false;
+  END;
+$$ LANGUAGE 'plpgsql';
+
+commit;

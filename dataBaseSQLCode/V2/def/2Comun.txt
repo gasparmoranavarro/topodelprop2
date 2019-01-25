@@ -1,0 +1,145 @@
+--			TABLAS DEFINITIVAS
+--------------------------------------------------------------
+
+--LOS NOMBRES DE LAS TABLAS NO PUEDEN TENER ESPACIOS, NI ACENTOS, NI EÑES.
+--LO MISMO OCURRE CON LOS NOMBRES DE LOS CAMPOS. LA APLICACIÓN NO FUNCIONARÍA.
+
+--Para cambiar el nombre del esquema de las tablas con geometria hay que realizar dos pasos:
+--	Sustituir src25830. por ed_srcXXXXX. Esto sustituye el esquema
+--		de los nombres de las tablas
+--	Sustituir 'src25830' por 'ed_srcXXXXX'. Esto sustituye el esquema
+
+
+begin;
+
+--usuarios
+create table comun.usuarios (id serial primary key, usuario varchar(25) not null unique, nombre1 varchar(50), nombre2 varchar(50), apellido1 varchar(50), apellido2 varchar(50), telefono integer, email varchar(100), tipo_usuario varchar(20),activado boolean not null,direccion_ip varchar(29) not null);
+
+alter table comun.usuarios add constraint caj_tipo_usuario foreign key (tipo_usuario) references dom.tipo_usuario (tipo_usuario) on delete cascade on update cascade;
+
+insert into comun.usuarios (usuario, nombre1, nombre2, apellido1, apellido2, telefono, email, tipo_usuario,activado,direccion_ip) values
+('admin_propiedad1', 'pepe', 'juan', 'martínez', 'martínez', 555555555, 'ddd@gmail.com','admin_propiedad',True,'XXXX');
+
+insert into comun.usuarios (usuario, nombre1, nombre2, apellido1, apellido2, telefono, email, tipo_usuario,activado, direccion_ip) values
+('editor1', 'Juan', '', 'fernández', '', 555555555, 'ddd@gmail.com','editor',True,'XXXX');
+
+insert into comun.usuarios (usuario, nombre1, nombre2, apellido1, apellido2, telefono, email, tipo_usuario,activado, direccion_ip) values
+('editor2', 'Juan', '', 'fernández', '', 555555555, 'ddd@gmail.com','editor',True,'XXXX');
+
+insert into comun.usuarios (usuario, nombre1, nombre2, apellido1, apellido2, telefono, email, tipo_usuario,activado, direccion_ip) values ('consultor_autorizado1', 'felipe', '', 'suarez', '', 555555555, 'dddd@gmail.com','consultor_autorizado',True,'XXXX');
+
+
+--TRABAJOS
+create table comun.trabajos (id_trabajo serial primary key, estado_trabajo varchar(10), src_trabajo varchar(6), fecha date, usuario varchar(25) not null, descripcion varchar(100), motivo_trabajo varchar(100), tipo_trabajo varchar(100), equipo_utilizado varchar(30), provincia varchar(30), municipio varchar(56),usuario_validador varchar default current_user);
+
+alter table comun.trabajos add constraint caj_src_trabajo foreign key (src_trabajo) references dom.src_trabajo (src_trabajo) on delete cascade on update cascade;
+
+alter table comun.trabajos add constraint caj_estado_trabajo foreign key (estado_trabajo) references dom.estado_trabajo (estado_trabajo) on delete cascade on update cascade;
+
+alter table comun.trabajos add constraint caj_tipo_trabajo foreign key (tipo_trabajo) references dom.tipo_trabajo (tipo_trabajo) on delete cascade on update cascade;
+
+alter table comun.trabajos add constraint caj_municipio foreign key (municipio) references dom.municipio(municipio) on delete cascade on update cascade;
+
+alter table comun.trabajos add constraint caj_motivo_trabajo foreign key (motivo_trabajo) references dom.motivo_trabajo (motivo_trabajo) on delete cascade on update cascade;
+
+alter table comun.trabajos add constraint caj_usuario foreign key (usuario) references comun.usuarios (usuario) on delete cascade on update cascade;
+
+alter table comun.trabajos add constraint caj_provincia foreign key (provincia) references dom.provincia (provincia) on delete cascade on update cascade;
+
+alter table comun.trabajos add constraint caj_equipo_ut foreign key (equipo_utilizado) references dom.equipo_utilizado (equipo_utilizado) on delete cascade on update cascade;
+
+-- 	usuario validador
+alter table comun.trabajos add constraint caj_usuario_validador foreign key (usuario_validador) references comun.usuarios (usuario) on delete cascade on update cascade;
+
+
+--MEMORIAS
+create table comun.memorias (id serial primary key, id_trabajo integer not null, descripcion varchar(100), nom_arch varchar(20) not null, archivo bytea, constraint r1_memo_trab unique (id_trabajo));--solo una memoria por trabajo
+
+alter table comun.memorias add constraint caj_memo_ntrab foreign key (id_trabajo) references comun.trabajos (id_trabajo) on delete cascade on update cascade;
+
+--PLANOS
+
+create table comun.planos (id serial primary key, id_trabajo integer not null, descripcion varchar (100), nom_arch varchar(20) not null, archivo bytea, constraint r1_plano_trab unique (id_trabajo,nom_arch));
+
+alter table comun.planos add constraint caj_planos_ntrab foreign key (id_trabajo) references comun.trabajos (id_trabajo) on delete cascade on update cascade;
+
+
+--HISTORICO DE TRABAJOS
+create table comun.trabajos_hist (id serial primary key, id_trabajo integer not null, id_trabajo_ant integer);
+
+alter table comun.trabajos_hist add constraint caj_ntrab foreign key (id_trabajo) references comun.trabajos (id_trabajo) on delete cascade on update cascade;
+
+alter table comun.trabajos_hist add constraint caj_ntrab_ant foreign key (id_trabajo_ant) references comun.trabajos (id_trabajo) on delete cascade on update cascade;
+
+--DIVISION. Cada división debe ser en un trabajo nuevo. Para dividir una finca, primero debe estar creada en un trabajo anterior
+	--id_trabajo es el trabajo actual
+	--id_trab_ant es el trabajo de la finca que se va a modificar
+
+create table comun.division (id serial primary key, id_trabajo integer not null, id_trab_ant integer not null);
+alter table comun.division add constraint caj_id_trabajo_div foreign key (id_trabajo) references comun.trabajos (id_trabajo) on delete cascade on update cascade;
+alter table comun.division add constraint caj_id_trabajo_ant foreign key (id_trab_ant) references comun.trabajos (id_trabajo) on delete cascade on update cascade;
+
+--SEGREGACIÓN. Cada segregación debe ser en un trabajo nuevo. Para segregar una finca, primero debe estar creada en un trabajo anterior
+	--id_trabajo es el trabajo actual
+	--id_trab_ant es el trabajo de la finca que se va a modificar
+
+create table comun.segregacion (id serial primary key, id_trabajo integer not null, id_trab_ant integer not null);
+alter table comun.segregacion add constraint caj_id_trabajo_div foreign key (id_trabajo) references comun.trabajos (id_trabajo) on delete cascade on update cascade;
+alter table comun.segregacion add constraint caj_id_trabajo_ant foreign key (id_trab_ant) references comun.trabajos (id_trabajo) on delete cascade on update cascade;
+
+--AGRUPACION. Se puede agrupar varias fincas en una, la del trabajo actual. Para agregar una finca, primero debe estar creada en un trabajo anterior
+	--id_trabajo es el trabajo actual
+	--id_trab_ant es el trabajo de la finca que se va a agregar
+
+create table comun.agrupacion (id serial primary key, id_trabajo integer not null, id_trab_ant integer not null);
+alter table comun.agrupacion add constraint caj_id_trabajo_div foreign key (id_trabajo) references comun.trabajos (id_trabajo) on delete cascade on update cascade;
+alter table comun.agrupacion add constraint caj_id_trabajo_ant foreign key (id_trab_ant) references comun.trabajos (id_trabajo) on delete cascade on update cascade;
+
+--clientes
+create table comun.clientes (id serial primary key, id_trabajo integer not null, dni integer not null, nombre varchar(30), apellidos varchar(30), telefono varchar(10), email varchar(30),nom_arch varchar(20) not null,archivo bytea, constraint r1_cliente_trab unique (id_trabajo,dni));
+
+alter table comun.clientes add constraint caj_id_trabajo_cli foreign key (id_trabajo) references comun.trabajos (id_trabajo) on delete cascade on update cascade;
+
+--Propietarios. Hace referencia a dom.tipo_propietario
+create table comun.propietarios (id serial primary key,id_trabajo integer not null, dni integer not null, nombre varchar(30), apellidos varchar(30), telefono varchar(10), email varchar(30), tipo_propietario varchar(30), nom_arch varchar(20) not null,archivo bytea, constraint r1_propiet_trab unique (id_trabajo,dni));
+
+alter table comun.propietarios add constraint caj_id_trabajo_prop foreign key (id_trabajo) references comun.trabajos (id_trabajo) on delete cascade on update cascade;
+
+alter table comun.propietarios add constraint caj_tipo_propietario_def foreign key (tipo_propietario) references dom.tipo_propietario (tipo_propietario) on delete cascade on update cascade;
+
+
+--Documentos_estudiados
+create table comun.documentos_estudiados (id serial primary key, id_trabajo integer not null, tipo_documento varchar(100), nom_arch varchar(20) not null, descripcion varchar(100), archivo bytea);
+
+alter table comun.documentos_estudiados add constraint caj_tipo_docuemento foreign key (tipo_documento) references dom.tipo_documento (tipo_documento) on delete cascade on update cascade;
+
+alter table comun.documentos_estudiados add constraint caj_id_trabajo foreign key (id_trabajo) references comun.trabajos (id_trabajo) on delete cascade on update cascade;
+
+
+--DIVISIONES VERTICALES. Lista con los trabajos que tienen fincas con divisiones verticales.
+create table comun.div_vert(id serial primary key, id_trabajo integer not null, id_tr_f_mat integer not null);
+alter table comun.div_vert add constraint caj_div_vert_nt1 foreign key (id_trabajo) references comun.trabajos(id_trabajo) on update cascade on delete cascade;
+alter table comun.div_vert add constraint caj_div_vert_nt2 foreign key (id_trabajo) references comun.trabajos(id_trabajo) on update cascade on delete cascade;
+
+--DESPLAZAMIENTOS DE LA CARTOGRAFÍA CATASTRAL
+create table comun.desp_carto_cat(id serial primary key, 
+				id_trabajo integer not null unique,
+				coeficiente_ax double precision default 0,
+				coeficiente_bx double precision default 0,
+				coeficiente_cx double precision default 0,
+				coeficiente_ay double precision default 0,
+				coeficiente_by double precision default 0,
+				coeficiente_cy double precision default 0);
+				
+alter table comun.desp_carto_cat add constraint caj_desp_carto_cat foreign key (id_trabajo) references comun.trabajos(id_trabajo) on delete cascade on update cascade;
+
+
+--INDICES NO ESPACIALES
+create index idx_trabajos_usuario on comun.trabajos(usuario);
+create index idx_doc_est_id_trab on comun.documentos_estudiados(id_trabajo);
+
+commit;
+
+--COMUN
+vacuum analyze comun.trabajos;
+vacuum analyze comun.documentos_estudiados;

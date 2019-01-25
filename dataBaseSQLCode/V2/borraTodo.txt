@@ -1,0 +1,2 @@
+\i c:/delprop/cbd/v2/def/borraTablasDef.txt
+\i c:/delprop/cbd/v2/edicion/borraTablasEd.txt

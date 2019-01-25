@@ -1,0 +1,20 @@
+<RCC>
+	<qresource prefix="plugins/UPVDelProp">
+		<file>iconos/trabajos.png</file>
+	</qresource>
+	<qresource prefix="plugins/UPVDelProp">
+		<file>iconos/cargaCapasDef.png</file>
+	</qresource>
+	<qresource prefix="plugins/UPVDelProp">
+		<file>iconos/cargaCapasEd.png</file>
+	</qresource>
+	<qresource prefix="plugins/UPVDelProp">
+		<file>iconos/conectar.png</file>
+     </qresource>
+	<qresource prefix="plugins/UPVDelProp">
+		<file>iconos/desconectar.png</file>
+     </qresource>
+	<qresource prefix="plugins/UPVDelProp">
+		<file>iconos/imagenes.png</file>
+     </qresource>
+</RCC>

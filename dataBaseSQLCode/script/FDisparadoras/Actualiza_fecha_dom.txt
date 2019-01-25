@@ -1,0 +1,22 @@
+begin;
+
+CREATE OR REPLACE FUNCTION script.actualiza_fecha_dom() RETURNS TRIGGER AS $$
+--Autor: Gaspar Mora Navarro. Universidad Politécnica de Valecncia.
+--Actualiza el la fecha de modificacion de los dominios. Los dominios son las
+--	tablas que hay en el esquema dom, que son los posibles valores de campo
+--	de muchas tablas en la base de datos. Si hay una modificación en alguna
+--	de las tablas de dom, se ejecuta esta funcion que establece la fecha y hora
+--	de la modificacion en la tabla dom.fecha_dom, en el campo fecha_dom.
+--	La aplicacion comprueba esta fecha y la compara con la fecha que tiene en su
+--	disco duro (DD). Si la fecha del DD es anterior, se descarga todos los valores
+--	y machaca los que tiene en el DD. De esta forma solo se descarga las tablas enç
+--	en el caso de alguna modificacion en el servidor. 
+
+  DECLARE
+  BEGIN
+	update dom.fecha_dom set fecha_dom=current_timestamp where id=1;
+	return NULL;
+  END;
+$$ LANGUAGE 'plpgsql';
+
+commit;

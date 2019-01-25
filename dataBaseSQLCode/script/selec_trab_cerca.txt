@@ -1,0 +1,116 @@
+begin;
+
+CREATE OR REPLACE FUNCTION script.select_trab_cerca(id_tr_ref integer, tipo_tr_ref varchar, tipo_tr_busc varchar, distancia_busc double precision) RETURNS refcursor AS $$
+/*Autor: Gaspar Mora Navarro. Universidad Politécnica de Valecncia.
+	Snapa la finca del id_tr_snapar sobre la finca id_tr_fijo. Luego snapa los demás elementos del trabajo
+		id_tr_snapar sobre la nueva forma snapada de su finca.
+Parámetros:
+	id_tr_snapar integer: id_trabajo del trabajo cuya finca se va a snapar
+	tipo_tr_snapar varchar: puede ser 'edicion' o 'definitivo'
+	id_tr_fijo integer: id_trabajo del trabajo que se usa para snapar
+	tipo_tr_fijo varchar: puede ser 'edicion' o 'definitivo'
+	distancia_snap double precision: Distancia utilizada para st_snap.
+Return:
+	True si llega al final de la función
+	Raise exception si hay algún problema
+*/
+DECLARE
+	geom_finca geometry;
+	resp boolean;
+	src_trab varchar;
+	nom_tabla_finca varchar;
+	nom_tabla_finca_busc varchar;
+	consulta varchar;
+	nom_tabla_tr_snapar varchar;
+	fila record;
+	cur refcursor;
+BEGIN
+	--BUSCO EL SRC DEL TRABAJO FIJO
+	if tipo_tr_ref='definitivo' then
+		consulta:='select src_trabajo into src_trab from comun.trabajos where id_trabajo=id_tr_ref';
+		select src_trabajo into src_trab from comun.trabajos where id_trabajo=id_tr_ref;
+		nom_tabla_finca:= 'src' || src_trab || '.fincas';
+	else
+		consulta:='select src_trabajo into src_trab from ed_comun.ed_trabajos where id_trabajo=id_tr_ref';
+		select src_trabajo into src_trab from ed_comun.ed_trabajos where id_trabajo=id_tr_ref;
+		nom_tabla_finca:= 'ed_src' || src_trab || '.ed_fincas';
+	end if;
+
+	if not found then
+		raise exception 'Error en select_trab_cerca: La consulta % no produjo ningun resultado: id_tr_ref: %', consulta, id_tr_ref;
+	end if;	
+	
+	--BUSCO LA GEOMETRÍA DEL TRABAJO DE REFERENCIA
+	consulta:='select geom from ' || nom_tabla_finca || ' where id_trabajo = $1';
+
+	execute consulta into geom_finca using id_tr_ref;
+
+	--TABLA DONDE SE BUSCA
+	if tipo_tr_busc='definitivo' then
+		nom_tabla_finca_busc:= 'src' || src_trab || '.fincas';
+	else
+		nom_tabla_finca_busc:= 'ed_src' || src_trab || '.ed_fincas';
+	end if;
+	
+	if tipo_tr_busc=tipo_tr_ref then
+		open cur for execute 'select id_trabajo from ' || nom_tabla_finca_busc || ' t1 where st_dwithin($1,t1.geom,$2) and t1.id_trabajo <> $3' using geom_finca,distancia_busc,id_tr_ref;	
+		
+	else
+		open cur for execute 'select id_trabajo from ' || nom_tabla_finca_busc || ' t1 where st_dwithin($1,t1.geom,$2)' using geom_finca,distancia_busc;	
+	end if;
+	return cur;
+
+  END;
+$$ LANGUAGE 'plpgsql';
+
+commit;
+
+begin;
+CREATE OR REPLACE FUNCTION script.select_trab_cerca_geom(geom_finca geometry, nomtabla_buscar varchar, distancia_busc double precision) RETURNS refcursor AS $$
+/*Autor: Gaspar Mora Navarro. Universidad Politécnica de Valecncia.
+	Devuelve un cursor con los id_trabajo, de la tabla nomtabla_buscar, que tienen una finca más cerca de distancia_busc.
+Parámetros:
+	geom_finca geometry:geometría de la finca sobre la que se buscan fincas vecinas
+	nomtabla_buscar varchar: nombre completo de la tabla, incluido el esquema: srcXXXXX.fincas
+	distancia_snap double precision: Distancia utilizada para st_snap.
+Return:
+	Cursor con la selección de trabajos.
+*/
+DECLARE
+	cur refcursor;
+BEGIN
+	open cur for execute 'select id_trabajo from ' || nomtabla_buscar || ' t1 where st_dwithin($1,t1.geom,$2)' using geom_finca,distancia_busc;	
+	return cur;
+
+  END;
+$$ LANGUAGE 'plpgsql';
+
+commit;
+
+
+
+
+/*
+begin;
+CREATE OR REPLACE FUNCTION comprueba() RETURNS boolean AS $$
+
+DECLARE
+ 
+  registro record;
+  cur refcursor;
+  BEGIN
+     	RAISE NOTICE 'Antes';
+	cur:=script.select_trab_cerca(57, 'definitivo','definitivo',0.0002);
+	loop
+		fetch cur into registro;
+		exit when not found;
+		raise notice 'id: %', registro.id_trabajo;
+	end loop;
+	close cur;
+	return true;
+  END;
+$$ LANGUAGE 'plpgsql';
+
+commit;
+
+*/

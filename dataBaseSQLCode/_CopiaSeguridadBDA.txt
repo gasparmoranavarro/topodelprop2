@@ -1,0 +1,54 @@
+-- crear una copia de seguridad de todo, salvo los usuarios y el esquema public
+
+--ejecutar desde el directorio bin de postgres. Especificar todos los esquemas a exportar.
+pg_dump -U postgres -h localhost -Fc -n comun -n dom -n ed_comun -n script -n ed_src4082 -n src4082 -n ed_src4083 -n src4083 -n ed_src25829 -n src25829 -n ed_src25830 -n src25830 -n ed_src25831 -n src25831 --disable-triggers atnl > atnl
+
+
+--Restaurar la base de datos
+--Si existe: borrala
+--Crear la base de datos:
+
+createdb –U postgres –E UTF8 atnl
+
+--dentro de la base de datos
+
+create extension postgis;
+
+--crear los grupos y los usuarios (si no existen). Al borrar la base de datos los grupos o 
+--usuarios no se borran:
+
+\i c:/delprop/cbd/003_creaUsuarios.txt
+
+--restaurar la base de datos
+--desde el directorio bin de postgres
+
+pg_restore -U postgres -d atnl atnl
+
+--Asignar los permisos a cada grupo sobre los objetos de la base de datos.
+--Esto, hay que hacerlo cada vez ya que los permisos eran sobre
+--objetos anteriores, hay que actualizar sobre los nuevos.
+--Si los usuarios no existen todavia, hay que crearlos con \i c:/delprop/cbd/003_creaUsuarios.txt
+
+--crear usuarios (solo si no existen)
+\i c:/delprop/cbd/003_creaUsuarios.txt
+
+--Permisos sobre los objetos de la base de datos
+
+--	-- Permisos sobre comun y ed_comun
+\i c:/delprop/cbd/004_permisosComun.txt
+
+-- --  Permisos sobre las tablas espaciales
+\i c:/delprop/cbd/004_permisos25828.txt
+\i c:/delprop/cbd/004_permisos25829.txt
+\i c:/delprop/cbd/004_permisos25830.txt
+\i c:/delprop/cbd/004_permisos25831.txt
+
+
+--NOTAS PARA LINUX.
+Para crear la base de datos desde cero en linux hay que copiar la carpeta cbd en la carpeta del usuario.
+Luego sustituir en todos los fichetos todas las rutas:
+
+	donde pone c:/delprop se cambia por /home/usuario/cbd
+	
+Funcionará, pero es mas fácil crear la base de datos en Windows, restaurarla en Linux y ejecutar solo
+los ficheros de creación de usuarios y permisos.

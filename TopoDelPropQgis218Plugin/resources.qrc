@@ -1,0 +1,31 @@
+<RCC>
+	<qresource prefix="plugins/TopoDelProp">
+		<file>iconos/trabajos.png</file>
+	</qresource>
+	<qresource prefix="plugins/TopoDelProp">
+		<file>iconos/cargaCapasDef.png</file>
+	</qresource>
+	<qresource prefix="plugins/TopoDelProp">
+		<file>iconos/cargaCapasEd.png</file>
+	</qresource>
+	<qresource prefix="plugins/TopoDelProp">
+		<file>iconos/conectar.png</file>
+     </qresource>
+	<qresource prefix="plugins/TopoDelProp">
+		<file>iconos/desconectar.png</file>
+     </qresource>
+	<qresource prefix="plugins/TopoDelProp">
+		<file>iconos/imagenes.png</file>
+     </qresource>
+	<qresource prefix="plugins/TopoDelProp">
+		<file>iconos/cargaTrabajo.png</file>
+     </qresource>
+	<qresource prefix="plugins/TopoDelProp">
+		<file>iconos/imgEI.png</file>
+     </qresource>
+	<qresource prefix="plugins/TopoDelProp">
+		<file>iconos/ayuda.png</file>
+     </qresource>
+
+
+</RCC>

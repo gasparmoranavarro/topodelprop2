@@ -1,0 +1,58 @@
+
+begin;
+
+CREATE OR REPLACE FUNCTION script.cal_lon_utm() RETURNS trigger AS $$
+	/*
+	Autor: Gaspar Mora Navarro. Universidad Politécnica de Valencia.
+	Calcula la longitud utm del arco y lo introduce en el campo lon_utm de la tabla
+	*/
+  BEGIN
+	NEW.lon_utm:=ST_Length(NEW.geom);
+	--raise notice 'longitud : %',ST_Length(NEW.geom);
+    	return NEW;
+  END;
+$$ LANGUAGE 'plpgsql';
+
+CREATE OR REPLACE FUNCTION script.cal_area_utm() RETURNS trigger AS $$
+	/*
+
+	Autor: Gaspar Mora Navarro. Universidad Politécnica de Valencia.
+	Calcula el área utm del polígono y lo introduce en el campo area_utm de la tabla
+	*/
+  BEGIN
+	--raise notice 'Area utm : %',st_area(NEW.geom);
+	NEW.area_utm:=st_area(NEW.geom);
+    	return NEW;
+  END;
+$$ LANGUAGE 'plpgsql';
+
+
+CREATE OR REPLACE FUNCTION script.cal_perimetro_utm() RETURNS trigger AS $$
+	/*
+
+	Autor: Gaspar Mora Navarro. Universidad Politécnica de Valencia.
+	Calcula el perímetro utm del arco y lo introduce en el campo perim_utm de la tabla
+	*/
+  BEGIN
+	NEW.perim_utm:=st_perimeter(NEW.geom);
+	--raise notice 'Perim utm : %',st_perimeter(NEW.geom);
+	return NEW;
+  END;
+$$ LANGUAGE 'plpgsql';
+
+CREATE OR REPLACE FUNCTION script.cal_area_elip() RETURNS trigger AS $$
+	/*
+
+	Autor: Gaspar Mora Navarro. Universidad Politécnica de Valencia.
+	Calcula el area en el elipsoide wgs84(el único soportado hasta ahora)
+	 y la almacena en el campo area_elip
+	*/
+  BEGIN
+	NEW.area_elip:=st_area(ST_GeogFromWKB(st_transform(NEW.geom,4326)));
+	--raise notice 'area elip : %',NEW.area_elip;
+	return NEW;
+  END;
+$$ LANGUAGE 'plpgsql';
+
+
+commit;

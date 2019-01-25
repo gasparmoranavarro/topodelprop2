@@ -1,0 +1,36 @@
+--CREAR BASE DE DATOS propiedad
+-- Hay que teclearlo a mano en el directorio bin de postgres.
+
+--No se puede copiar y pegar, hay que teclear. Si no no va.
+--createdb –U postgres –E UTF8 atnl
+
+--dentro de la base de datos, si se ejecuta este comando se crea todo,
+--pero hay que descomentar la creacion de los usuarios si no existen todavía
+--\i c:/delprop/cbd/000_CreaBDPropiedad.txt
+
+create extension postgis;
+
+
+--crear todas las tablas y esquemas
+\i c:/delprop/cbd/001_creaComun.txt
+\i c:/delprop/cbd/001_crea4082.txt
+\i c:/delprop/cbd/001_crea4083.txt
+\i c:/delprop/cbd/001_crea25829.txt
+\i c:/delprop/cbd/001_crea25830.txt
+\i c:/delprop/cbd/001_crea25831.txt
+
+--crear usuarios (solo si no existen)
+--\i c:/delprop/cbd/003_creaUsuarios.txt
+
+--Permisos sobre los objetos de la base de datos
+
+--	-- Permisos sobre comun y ed_comun
+\i c:/delprop/cbd/004_permisosComun.txt
+
+-- --  Permisos sobre las tablas espaciales
+\i c:/delprop/cbd/004_permisos4082.txt
+\i c:/delprop/cbd/004_permisos4083.txt
+\i c:/delprop/cbd/004_permisos25829.txt
+\i c:/delprop/cbd/004_permisos25830.txt
+\i c:/delprop/cbd/004_permisos25831.txt
+

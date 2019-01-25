@@ -1,0 +1,321 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>frmPpal</class>
+ <widget class="QMainWindow" name="frmPpal">
+  <property name="windowModality">
+   <enum>Qt::NonModal</enum>
+  </property>
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>221</width>
+    <height>477</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>TopoDelProp</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <widget class="QTreeView" name="treeView">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>0</y>
+      <width>221</width>
+      <height>401</height>
+     </rect>
+    </property>
+    <property name="allColumnsShowFocus">
+     <bool>false</bool>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="txtInfo">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>400</y>
+      <width>221</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>221</width>
+     <height>26</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menu">
+    <property name="title">
+     <string>Menu</string>
+    </property>
+    <widget class="QMenu" name="menuUsuOperacionesFincas">
+     <property name="title">
+      <string>Operaciones con fincas</string>
+     </property>
+     <addaction name="opAgreDivVert"/>
+     <addaction name="opDividirFinca"/>
+     <addaction name="opAgregarFinca"/>
+     <addaction name="opSegregarFinca"/>
+    </widget>
+    <widget class="QMenu" name="menuConsultar_trabajo">
+     <property name="title">
+      <string>Consultar-editar trabajo</string>
+     </property>
+     <widget class="QMenu" name="menuBuscar_por_referencia_catastral">
+      <property name="title">
+       <string>Buscar por referencia catastral</string>
+      </property>
+      <addaction name="opBuscarPorRefCatRus"/>
+      <addaction name="opBuscarPorRefCatUrb"/>
+     </widget>
+     <addaction name="opRecargarTrabajo"/>
+     <addaction name="opBuscarPorTrabajo"/>
+     <addaction name="opBuscarPorFinca"/>
+     <addaction name="menuBuscar_por_referencia_catastral"/>
+     <addaction name="opBuscarPorPropietarios"/>
+     <addaction name="opBuscarPorClientes"/>
+     <addaction name="opBuscarPorColindantes"/>
+    </widget>
+    <widget class="QMenu" name="menuComprobar_finca">
+     <property name="title">
+      <string>Comprobar finca</string>
+     </property>
+     <addaction name="opCargarCapasErrores"/>
+     <addaction name="opComprobarErroresFinca"/>
+     <addaction name="opBorrarErroresFinca"/>
+     <addaction name="opBorrarErroresSRC"/>
+    </widget>
+    <addaction name="opNuevoTrabajo"/>
+    <addaction name="menuUsuOperacionesFincas"/>
+    <addaction name="menuComprobar_finca"/>
+    <addaction name="opBorrarTrabajo"/>
+    <addaction name="opValidarTrabajo"/>
+    <addaction name="separator"/>
+    <addaction name="menuConsultar_trabajo"/>
+    <addaction name="opVerHistorico"/>
+   </widget>
+   <widget class="QMenu" name="menuAyuda">
+    <property name="title">
+     <string>Ayuda</string>
+    </property>
+    <addaction name="opAyuda"/>
+    <addaction name="opAcercaDe"/>
+   </widget>
+   <addaction name="menu"/>
+   <addaction name="menuAyuda"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <action name="opNuevoTrabajo">
+   <property name="text">
+    <string>Nuevo trabajo</string>
+   </property>
+   <property name="toolTip">
+    <string>Crea un nuevo trabajo</string>
+   </property>
+  </action>
+  <action name="opUsuEditarTrabajo">
+   <property name="text">
+    <string>Editar trabajo</string>
+   </property>
+   <property name="toolTip">
+    <string>Editar trabajo existente</string>
+   </property>
+  </action>
+  <action name="actionOo3">
+   <property name="text">
+    <string>oo3</string>
+   </property>
+  </action>
+  <action name="actionOo4">
+   <property name="text">
+    <string>oo4</string>
+   </property>
+  </action>
+  <action name="opVerHistorico">
+   <property name="text">
+    <string>Ver historico de una finca</string>
+   </property>
+  </action>
+  <action name="opAgreDivVert">
+   <property name="text">
+    <string>Agregar division vertical</string>
+   </property>
+  </action>
+  <action name="opDividirFinca">
+   <property name="text">
+    <string>Dividir finca</string>
+   </property>
+  </action>
+  <action name="opAgregarFinca">
+   <property name="text">
+    <string>Agregar finca</string>
+   </property>
+  </action>
+  <action name="opSegregarFinca">
+   <property name="text">
+    <string>Segregar finca</string>
+   </property>
+  </action>
+  <action name="opUsuBuscarTrabajo">
+   <property name="text">
+    <string>Buscar por datos del trabajo</string>
+   </property>
+  </action>
+  <action name="actionBuscar_por_datos_de_la_finca">
+   <property name="text">
+    <string>Buscar por datos de la finca</string>
+   </property>
+  </action>
+  <action name="actionBuscar_por_referencia_catastral">
+   <property name="text">
+    <string>Buscar por referencia catastral</string>
+   </property>
+  </action>
+  <action name="actionBuscar_por_propietario">
+   <property name="text">
+    <string>Buscar por propietario</string>
+   </property>
+  </action>
+  <action name="actionBuscar_por_cliente">
+   <property name="text">
+    <string>Buscar por cliente</string>
+   </property>
+  </action>
+  <action name="opAcercaDe">
+   <property name="text">
+    <string>Acerca de ...</string>
+   </property>
+  </action>
+  <action name="opAyuda">
+   <property name="text">
+    <string>Ayuda</string>
+   </property>
+  </action>
+  <action name="opAdminBuscarPorTrabajo">
+   <property name="text">
+    <string>Buscar por datos del trabajo</string>
+   </property>
+  </action>
+  <action name="opAdminBuscarPorFinca">
+   <property name="text">
+    <string>Buscar por datos de la finca</string>
+   </property>
+  </action>
+  <action name="opAdminBuscarporRefCat">
+   <property name="text">
+    <string>Buscar por referencia catastral</string>
+   </property>
+  </action>
+  <action name="opAdminBuscarPorPropiet">
+   <property name="text">
+    <string>Buscar por propietario</string>
+   </property>
+  </action>
+  <action name="opAdminBuscarPorCliente">
+   <property name="text">
+    <string>Buscar por cliente</string>
+   </property>
+  </action>
+  <action name="actionValidar_trabajo">
+   <property name="text">
+    <string>Validar trabajo</string>
+   </property>
+  </action>
+  <action name="opBuscarPorTrabajo">
+   <property name="text">
+    <string>Buscar por datos del trabajo</string>
+   </property>
+  </action>
+  <action name="opBuscarPorFinca">
+   <property name="text">
+    <string>Buscar por datos de la finca</string>
+   </property>
+  </action>
+  <action name="opValidarTrabajo">
+   <property name="text">
+    <string>Validar trabajo</string>
+   </property>
+  </action>
+  <action name="opBuscarPorPropietarios">
+   <property name="text">
+    <string>Buscar por propietarios</string>
+   </property>
+  </action>
+  <action name="opBuscarPorClientes">
+   <property name="text">
+    <string>Buscar por clientes</string>
+   </property>
+  </action>
+  <action name="opBuscarPorColindantes">
+   <property name="text">
+    <string>Buscar por colindantes</string>
+   </property>
+  </action>
+  <action name="opBuscarPorRefCatRus">
+   <property name="text">
+    <string>Rústica</string>
+   </property>
+  </action>
+  <action name="opBuscarPorRefCatUrb">
+   <property name="text">
+    <string>Urbana</string>
+   </property>
+  </action>
+  <action name="opRecargarTrabajo">
+   <property name="text">
+    <string>Recargar trabajo actual</string>
+   </property>
+  </action>
+  <action name="opBorrarTrabajo">
+   <property name="text">
+    <string>Borrar trabajo</string>
+   </property>
+  </action>
+  <action name="opCrearUsuarios">
+   <property name="text">
+    <string>Crear usuarios</string>
+   </property>
+  </action>
+  <action name="opCreaUsuarios">
+   <property name="text">
+    <string>Crear usuarios</string>
+   </property>
+  </action>
+  <action name="opBuscaUsuarios">
+   <property name="text">
+    <string>Buscar usuarios</string>
+   </property>
+  </action>
+  <action name="opCargarCapasErrores">
+   <property name="text">
+    <string>Cargar capas de solapes y huecos</string>
+   </property>
+  </action>
+  <action name="opComprobarErroresFinca">
+   <property name="text">
+    <string>Comprobar solapes y huecos</string>
+   </property>
+  </action>
+  <action name="opBorrarErroresFinca">
+   <property name="text">
+    <string>Borrar solapes y huecos de este trabajo</string>
+   </property>
+  </action>
+  <action name="opBorrarErroresSRC">
+   <property name="text">
+    <string>Borrar solapes y huecos de los trabajos del SRC</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

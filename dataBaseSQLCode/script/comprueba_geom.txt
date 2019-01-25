@@ -1,0 +1,63 @@
+begin;
+
+CREATE OR REPLACE FUNCTION script.comprueba_geom(geom geometry) RETURNS geometry AS $$
+/*Autor: Gaspar Mora Navarro. Universidad Politécnica de Valecncia.
+Se puede aplicar a todas las geometrías.
+Realiza las siguientes comprobaciones:
+	- Que la geometría no sea null
+	- Que la geometría no sea empty
+	- Que la geometría sea simple, es decir que no tenga auto intersecciones
+Si alguna de las tres condiciones anteriores no es cierta, genera un error. En caso
+contrario, elimina los puntos duplicados de la geometría, si los tiene, y devuelve
+la nueva geometría sin duplicados.
+	- Si la geometría es un polígono o multipolígono, fuerza el sentido de los anillos.
+
+*/
+  DECLARE
+	geom2 geometry;
+	tipo_geom varchar;
+	dist_snap_to_grid2 double precision;
+  BEGIN
+	select dist_snap_to_grid into dist_snap_to_grid2 from dom.cfg_tamanos where id >-1;
+
+	if not found then
+		raise exception 'Error en comprueba_geom: La consulta select dist_snap_to_grid into dist_snap_to_grid2 from dom.cfg_tamanos where id >-1 no produjo ningun resultado';
+	end if;
+	if dist_snap_to_grid2 is null then
+		raise exception 'Error en comprueba_geom: dom.cfg_tamanos.dist_snap_to_grid no puede ser null';
+	end if;
+
+	if geom is null then
+		raise exception 'Error, la geometria es null';
+	end if;
+
+	if st_isEmpty(geom) then
+		raise exception 'Error, la geometria esta vacia';
+	end if;
+	geom2:=ST_SnapToGrid(geom,dist_snap_to_grid2);
+
+	if geom2 is null then
+		raise exception 'Error, la geometria es null';
+	end if;
+	if st_isEmpty(geom2) then
+		raise exception 'Error, la geometria esta vacia';
+	end if;
+
+	if not(st_isSimple(geom2)) then
+		raise exception 'Error, la geometria no es simple';
+	end if;
+	if not(st_isValid(geom2)) then
+		raise exception 'Error, la geometria valida';
+	end if;
+
+	geom2:=st_removerepeatedpoints(geom2);
+
+	tipo_geom:=ST_GeometryType(geom2);
+	if 'ST_Polygon' = tipo_geom or 'ST_MultiPolygon' = tipo_geom then
+		geom2:=st_forcerhr(geom2);
+	end if;
+	return geom2;
+  END;
+$$ LANGUAGE 'plpgsql';
+
+commit;

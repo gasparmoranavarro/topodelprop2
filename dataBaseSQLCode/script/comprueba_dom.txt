@@ -1,0 +1,34 @@
+begin;
+
+CREATE OR REPLACE FUNCTION script.posterior_fecha_dom(fecha_plugin timestamp) RETURNS boolean AS $$
+--Autor: Gaspar Mora Navarro. Universidad Politécnica de Valecncia.
+--Esta funcion devuelve true o false, comprobando si la fecha que se le pasa como
+--parametro (fecha_plugin) es posterior a la fecha que hay en dom.fecha_dom.fecha_dom 
+--   	Devuelve true si es posterior 
+--	Devuelve false si no es posterior 
+--Esta funcion se usa desde el plugin de python para saber si hay que descargar de nuevo
+--los dominios al disco duro, ya que se ha producido algún cambio en alguna tabla de
+--del esquema dom
+
+  DECLARE
+	fecha_dom	timestamp; ---comun.varios.fecha_dom%FIELTYPE;
+	fila_varios	dom.fecha_dom%ROWTYPE;
+ 	cur 		refcursor;
+  BEGIN
+     	open cur for execute 'select * from dom.fecha_dom'; 
+
+--actualizar la fecha de los dominios
+--UPDATE dom.fecha_dom set fecha_dom=current_timestamp;
+
+	FETCH cur INTO fila_varios;
+	fecha_dom := fila_varios.fecha_dom;
+	if fecha_dom > fecha_plugin then
+		return true;
+	else
+		return false;
+	end if;
+     	CLOSE cur;
+  END;
+$$ LANGUAGE 'plpgsql';
+
+commit;

@@ -1,0 +1,29 @@
+begin;
+--crear grupos
+create role admin_propiedad;-- -->createrole y createuser no se hereda
+create role editor connection limit 5;
+create role consultor connection limit 5;
+create role consultor_autorizado connection limit 5;
+
+
+--crear usuarios
+create user consultor1 with encrypted password 'consultor1' login;
+create user editor1 with encrypted password 'editor1' login;
+create user editor2 with encrypted password 'editor2' login;
+create user consultor_autorizado1 with encrypted password 'consultor_autorizado1' login;
+create user admin_propiedad1 with encrypted password 'admin_propiedad1' createrole login;
+
+--Añadir usuarios a los grupos
+grant admin_propiedad to admin_propiedad1;
+grant editor to editor1;
+grant editor to editor2;
+grant consultor to consultor1;
+grant consultor_autorizado to consultor_autorizado1;
+
+--cambiar contraseñas para que no coincida con lo publicado
+alter role consultor_autorizado1 with encrypted password 'consultor_autorizado1123';
+alter role editor1 with encrypted password 'editor1123';
+alter role editor2 with encrypted password 'editor2123';
+alter role admin_propiedad1 with encrypted password 'admin_propiedad1123';
+
+commit;

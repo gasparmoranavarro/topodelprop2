@@ -1,0 +1,11 @@
+begin;
+alter table ed_src25830.ed_lindes add column precision_final_cm double precision;
+--update ed_src25830.ed_lindes set precision_final_cm=5;
+alter table ed_src25830.ed_lindes alter column precision_final_cm set not null;
+
+alter table src25830.lindes add column precision_final_cm double precision;
+--update src25830.lindes set precision_final_cm=5;
+alter table src25830.lindes alter column precision_final_cm set not null;
+
+
+commit;

@@ -1,0 +1,13 @@
+begin;
+
+CREATE OR REPLACE FUNCTION script.genera_noticia(noticia varchar) RETURNS boolean AS $$
+/*Autor: Gaspar Mora Navarro. Universidad Politécnica de Valecncia.
+*/
+DECLARE
+BEGIN
+	raise notice '%',noticia;
+	return True;
+  END;
+$$ LANGUAGE 'plpgsql';
+
+commit;

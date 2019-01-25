@@ -1,0 +1,103 @@
+--			TABLAS EDICION
+--------------------------------------------------------------
+
+--LOS NOMBRES DE LAS TABLAS NO PUEDEN TENER ESPACIOS, NI ACENTOS, NI EÑES.
+--LO MISMO OCURRE CON LOS NOMBRES DE LOS CAMPOS. LA APLICACIÓN NO FUNCIONARÍA.
+
+--
+--	Sustituir comun por ed_comun 
+-- 	Cambiar la despues ed_comun.usuarios por comun.usuarios 
+
+
+begin;
+
+
+create table ed_comun.ed_trabajos (id_trabajo serial primary key, estado_trabajo varchar(10), src_trabajo varchar(6), fecha date, usuario varchar(25) not null, descripcion varchar(100), motivo_trabajo varchar(100), tipo_trabajo varchar(100), equipo_utilizado varchar(30), provincia varchar(30), municipio varchar(56));
+
+alter table ed_comun.ed_trabajos add constraint caj_src_trabajo foreign key (src_trabajo) references dom.src_trabajo (src_trabajo) on delete cascade on update cascade;
+
+alter table ed_comun.ed_trabajos add constraint caj_estado_trabajo foreign key (estado_trabajo) references dom.estado_trabajo (estado_trabajo) on delete cascade on update cascade;
+
+alter table ed_comun.ed_trabajos add constraint caj_tipo_trabajo foreign key (tipo_trabajo) references dom.tipo_trabajo (tipo_trabajo) on delete cascade on update cascade;
+
+alter table ed_comun.ed_trabajos add constraint caj_municipio foreign key (municipio) references dom.municipio(municipio) on delete cascade on update cascade;
+
+alter table ed_comun.ed_trabajos add constraint caj_motivo_trabajo foreign key (motivo_trabajo) references dom.motivo_trabajo (motivo_trabajo) on delete cascade on update cascade;
+
+alter table ed_comun.ed_trabajos add constraint caj_usuario foreign key (usuario) references comun.usuarios (usuario) on delete cascade on update cascade;
+
+alter table ed_comun.ed_trabajos add constraint caj_provincia foreign key (provincia) references dom.provincia (provincia) on delete cascade on update cascade;
+
+alter table ed_comun.ed_trabajos add constraint caj_equipo_ut foreign key (equipo_utilizado) references dom.equipo_utilizado (equipo_utilizado) on delete cascade on update cascade;
+
+--MEMORIAS
+create table ed_comun.ed_memorias (id serial primary key, id_trabajo integer not null, descripcion varchar(100), nom_arch varchar(20) not null, archivo bytea, constraint r1_memo_trab unique (id_trabajo));
+
+alter table ed_comun.ed_memorias add constraint caj_memo_ntrab foreign key (id_trabajo) references ed_comun.ed_trabajos (id_trabajo) on delete cascade on update cascade;
+
+--PLANOS
+
+create table ed_comun.ed_planos (id serial primary key, id_trabajo integer not null, descripcion varchar (100),nom_arch varchar(20) not null, archivo bytea,constraint r1_plano_trab unique (id_trabajo,nom_arch));
+
+alter table ed_comun.ed_planos add constraint caj_planos_ntrab foreign key (id_trabajo) references ed_comun.ed_trabajos (id_trabajo) on delete cascade on update cascade;
+
+--DIVISION. Cada división debe ser en un trabajo nuevo. Para dividir una finca, primero debe estar creada en un trabajo anterior
+	--id_trabajo es el trabajo actual
+	--id_trab_ant es el trabajo de la finca que se va a modificar
+
+create table ed_comun.ed_division (id serial primary key, id_trabajo integer not null, id_trab_ant integer not null);
+alter table ed_comun.ed_division add constraint caj_id_trabajo_div foreign key (id_trabajo) references ed_comun.ed_trabajos (id_trabajo) on delete cascade on update cascade;
+alter table ed_comun.ed_division add constraint caj_id_trabajo_ant foreign key (id_trab_ant) references ed_comun.ed_trabajos (id_trabajo) on delete cascade on update cascade;
+
+--SEGREGACIÓN. Cada segregación debe ser en un trabajo nuevo. Para segregar una finca, primero debe estar creada en un trabajo anterior
+	--id_trabajo es el trabajo actual
+	--id_trab_ant es el trabajo de la finca que se va a modificar
+
+create table ed_comun.ed_segregacion (id serial primary key, id_trabajo integer not null, id_trab_ant integer not null);
+alter table ed_comun.ed_segregacion add constraint caj_id_trabajo_div foreign key (id_trabajo) references ed_comun.ed_trabajos (id_trabajo) on delete cascade on update cascade;
+alter table ed_comun.ed_segregacion add constraint caj_id_trabajo_ant foreign key (id_trab_ant) references ed_comun.ed_trabajos (id_trabajo) on delete cascade on update cascade;
+
+--AGRUPACION. Se puede agrupar varias fincas en una, la del trabajo actual. Para agregar una finca, primero debe estar creada en un trabajo anterior
+	--id_trabajo es el trabajo actual
+	--id_trab_ant es el trabajo de la finca que se va a agregar
+
+create table ed_comun.ed_agrupacion (id serial primary key, id_trabajo integer not null, id_trab_ant integer not null);
+alter table ed_comun.ed_agrupacion add constraint caj_id_trabajo_div foreign key (id_trabajo) references ed_comun.ed_trabajos (id_trabajo) on delete cascade on update cascade;
+alter table ed_comun.ed_agrupacion add constraint caj_id_trabajo_ant foreign key (id_trab_ant) references ed_comun.ed_trabajos (id_trabajo) on delete cascade on update cascade;
+
+--clientes
+create table ed_comun.ed_clientes (id serial primary key, id_trabajo integer not null, dni integer not null, nombre varchar(30), apellidos varchar(30), telefono varchar(10), email varchar(30), nom_arch varchar(20) not null,archivo bytea, constraint r1_cliente_trab unique (id_trabajo,dni));
+
+alter table ed_comun.ed_clientes add constraint caj_id_trabajo_cli foreign key (id_trabajo) references ed_comun.ed_trabajos (id_trabajo) on delete cascade on update cascade;
+
+--Propietarios. Hace referencia a dom.tipo_propietario
+create table ed_comun.ed_propietarios (id serial primary key, id_trabajo integer not null, dni integer not null, nombre varchar(30) not null, apellidos varchar(30), telefono varchar(10), email varchar(30), tipo_propietario varchar(30), nom_arch varchar(20) not null,archivo bytea, constraint r1_propiet_trab unique (id_trabajo,dni));
+
+alter table ed_comun.ed_propietarios add constraint caj_id_trabajo_prop foreign key (id_trabajo) references ed_comun.ed_trabajos (id_trabajo) on delete cascade on update cascade;
+
+alter table ed_comun.ed_propietarios add constraint caj_tipo_propietario foreign key (tipo_propietario) references dom.tipo_propietario (tipo_propietario) on delete cascade on update cascade;
+
+--Documentos_estudiados
+create table ed_comun.ed_documentos_estudiados (id serial primary key,id_trabajo integer not null, tipo_documento varchar(100), nom_arch varchar(20) not null, descripcion varchar(100), archivo bytea);
+
+alter table ed_comun.ed_documentos_estudiados add constraint caj_tipo_docuemento foreign key (tipo_documento) references dom.tipo_documento (tipo_documento) on delete cascade on update cascade;
+
+alter table ed_comun.ed_documentos_estudiados add constraint caj_id_trabajo foreign key (id_trabajo) references ed_comun.ed_trabajos (id_trabajo) on delete cascade on update cascade;
+
+--DIVISIONES VERTICALES. Lista con los trabajos que tienen fincas con divisiones verticales.
+create table ed_comun.ed_div_vert(id serial primary key, id_trabajo integer not null, id_tr_f_mat integer not null);
+alter table ed_comun.ed_div_vert add constraint caj_div_vert_nt1 foreign key (id_trabajo) references ed_comun.ed_trabajos(id_trabajo) on update cascade on delete cascade;
+alter table ed_comun.ed_div_vert add constraint caj_div_vert_nt2 foreign key (id_trabajo) references ed_comun.ed_trabajos(id_trabajo) on update cascade on delete cascade;
+
+--DESPLAZAMIENTOS DE LA CARTOGRAFÍA CATASTRAL
+create table ed_comun.ed_desp_carto_cat(id serial primary key, 
+				id_trabajo integer not null,
+				coeficiente_ax double precision default 0,
+				coeficiente_bx double precision default 0,
+				coeficiente_cx double precision default 0,
+				coeficiente_ay double precision default 0,
+				coeficiente_by double precision default 0,
+				coeficiente_cy double precision default 0);
+alter table ed_comun.ed_desp_carto_cat add constraint caj_ed_desp_carto_cat foreign key (id_trabajo) references ed_comun.ed_trabajos(id_trabajo) on delete cascade on update cascade;
+
+commit;

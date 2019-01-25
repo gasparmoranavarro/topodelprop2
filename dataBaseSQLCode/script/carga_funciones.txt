@@ -1,0 +1,40 @@
+\i c:/delprop/cbd/script/borra_errores_finca_def.txt
+\i c:/delprop/cbd/script/borra_errores_finca_ed.txt
+\i c:/delprop/cbd/script/comp_gaps_finca_def.txt
+\i c:/delprop/cbd/script/comp_gaps_finca_ed.txt
+\i c:/delprop/cbd/script/comp_over_finca_def.txt
+\i c:/delprop/cbd/script/comp_over_finca_ed.txt
+
+\i c:/delprop/cbd/script/comprueba_covers.txt
+\i c:/delprop/cbd/script/comprueba_dom.txt
+\i c:/delprop/cbd/script/comprueba_gaps.txt
+\i c:/delprop/cbd/script/comprueba_geom.txt
+\i c:/delprop/cbd/script/comprueba_overlaps.txt
+\i c:/delprop/cbd/script/comprueba_overlaps_geom.txt
+\i c:/delprop/cbd/script/comprueba_overlaps_wkt.txt
+\i c:/delprop/cbd/script/comprueba_tama.txt
+\i c:/delprop/cbd/script/genera_noticia.txt
+\i c:/delprop/cbd/script/ea_linestring_cerrada.txt
+\i c:/delprop/cbd/script/error_area_multipoligono.txt
+\i c:/delprop/cbd/script/stx_extract.txt
+\i c:/delprop/cbd/script/snap_trabajo_a2b.txt
+\i c:/delprop/cbd/script/selec_trab_cerca.txt
+\i c:/delprop/cbd/script/snap_trabajos_geom.txt
+
+\i c:/delprop/cbd/script/fdisparadoras/acceso_trabajo.txt
+\i c:/delprop/cbd/script/fdisparadoras/activa_usuario.txt
+\i c:/delprop/cbd/script/fdisparadoras/Actualiza_fecha_dom.txt
+\i c:/delprop/cbd/script/fdisparadoras/cambios_datos_trabajo.txt
+\i c:/delprop/cbd/script/fdisparadoras/comprueba_usuario.txt
+\i c:/delprop/cbd/script/fdisparadoras/error_area.txt
+\i c:/delprop/cbd/script/fdisparadoras/geom_fincas_ed.txt
+\i c:/delprop/cbd/script/fdisparadoras/geom_fincas_def.txt
+\i c:/delprop/cbd/script/fdisparadoras/geom_imagenes.txt
+\i c:/delprop/cbd/script/fdisparadoras/geom_linde.txt
+\i c:/delprop/cbd/script/fdisparadoras/geom_servid_ei.txt
+\i c:/delprop/cbd/script/fdisparadoras/propiedades_geometricas.txt
+\i c:/delprop/cbd/script/fdisparadoras/parcelas_afectadas.txt
+
+--\i c:/delprop/cbd/script/fdisparadoras/crea_disparadores.txt
+
+

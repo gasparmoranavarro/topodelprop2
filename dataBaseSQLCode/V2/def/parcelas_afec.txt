@@ -1,0 +1,59 @@
+begin;
+
+--parcelas afectadas 25828
+create table src25828.parcelas_afectadas(gid serial primary key, id_trabajo integer not null, gid_finca integer, 
+	localid varchar,namespace varchar not null, nationalcadastralreference varchar(20) not null, 
+	areavalue double precision  not null,label varchar,endlifespanversion timestamp,beginlifespanversion timestamp  not null);
+
+select addgeometrycolumn('src25828','parcelas_afectadas','geom',25828,'MULTIPOLYGON',2, false);
+alter table src25828.parcelas_afectadas add constraint caj_parcelas_afectadas_ntrab foreign key (id_trabajo) references comun.trabajos(id_trabajo) on update cascade on delete cascade;
+alter table src25828.parcelas_afectadas add constraint caj_gid_finca foreign key (gid_finca) references src25828.fincas(gid) on update cascade on delete cascade;
+alter table src25828.parcelas_afectadas add constraint caj_namespace foreign key (namespace) references dom.namespace(namespace) on delete cascade on update cascade;
+
+--parcelas afectadas 25829
+create table src25829.parcelas_afectadas(gid serial primary key, id_trabajo integer not null, gid_finca integer, 
+	localid varchar,namespace varchar not null, nationalcadastralreference varchar(20) not null, 
+	areavalue double precision  not null,label varchar,endlifespanversion timestamp,beginlifespanversion timestamp  not null);
+
+select addgeometrycolumn('src25829','parcelas_afectadas','geom',25829,'MULTIPOLYGON',2, false);
+alter table src25829.parcelas_afectadas add constraint caj_parcelas_afectadas_ntrab foreign key (id_trabajo) references comun.trabajos(id_trabajo) on update cascade on delete cascade;
+alter table src25829.parcelas_afectadas add constraint caj_gid_finca foreign key (gid_finca) references src25829.fincas(gid) on update cascade on delete cascade;
+alter table src25829.parcelas_afectadas add constraint caj_namespace foreign key (namespace) references dom.namespace(namespace) on delete cascade on update cascade;
+
+--parcelas afectadas 25830
+create table src25830.parcelas_afectadas(gid serial primary key, id_trabajo integer not null, gid_finca integer, 
+	localid varchar,namespace varchar not null, nationalcadastralreference varchar(20) not null, 
+	areavalue double precision  not null,label varchar,endlifespanversion timestamp,beginlifespanversion timestamp  not null);
+
+select addgeometrycolumn('src25830','parcelas_afectadas','geom',25830,'MULTIPOLYGON',2, false);
+alter table src25830.parcelas_afectadas add constraint caj_parcelas_afectadas_ntrab foreign key (id_trabajo) references comun.trabajos(id_trabajo) on update cascade on delete cascade;
+alter table src25830.parcelas_afectadas add constraint caj_gid_finca foreign key (gid_finca) references src25830.fincas(gid) on update cascade on delete cascade;
+alter table src25830.parcelas_afectadas add constraint caj_namespace foreign key (namespace) references dom.namespace(namespace) on delete cascade on update cascade;
+
+--parcelas afectadas 25831
+create table src25831.parcelas_afectadas(gid serial primary key, id_trabajo integer not null, gid_finca integer, 
+	localid varchar,namespace varchar not null, nationalcadastralreference varchar(20) not null, 
+	areavalue double precision  not null,label varchar,endlifespanversion timestamp,beginlifespanversion timestamp  not null);
+
+select addgeometrycolumn('src25831','parcelas_afectadas','geom',25831,'MULTIPOLYGON',2, false);
+alter table src25831.parcelas_afectadas add constraint caj_parcelas_afectadas_ntrab foreign key (id_trabajo) references comun.trabajos(id_trabajo) on update cascade on delete cascade;
+alter table src25831.parcelas_afectadas add constraint caj_gid_finca foreign key (gid_finca) references src25831.fincas(gid) on update cascade on delete cascade;
+alter table src25831.parcelas_afectadas add constraint caj_namespace foreign key (namespace) references dom.namespace(namespace) on delete cascade on update cascade;
+
+--Indices
+create index ie_parcelas_afectadas_gist on src25828.parcelas_afectadas using gist(geom);
+create index ie_parcelas_afectadas_gist on src25829.parcelas_afectadas using gist(geom);
+create index ie_parcelas_afectadas_gist on src25830.parcelas_afectadas using gist(geom);
+create index ie_parcelas_afectadas_gist on src25831.parcelas_afectadas using gist(geom);
+
+commit;
+
+--vacuums
+vacuum analyze src25828.parcelas_afectadas;
+vacuum analyze src25829.parcelas_afectadas;
+vacuum analyze src25830.parcelas_afectadas;
+vacuum analyze src25831.parcelas_afectadas;
+
+
+
+

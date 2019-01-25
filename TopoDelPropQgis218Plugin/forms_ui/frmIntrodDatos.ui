@@ -1,0 +1,370 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>frmIntrodDatos</class>
+ <widget class="QDialog" name="frmIntrodDatos">
+  <property name="windowModality">
+   <enum>Qt::NonModal</enum>
+  </property>
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>975</width>
+    <height>591</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>TopoDelProp. Introducción de datos de: </string>
+  </property>
+  <property name="modal">
+   <bool>false</bool>
+  </property>
+  <widget class="QTableWidget" name="tableWidget">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>40</y>
+     <width>741</width>
+     <height>371</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>Pinche sobre el campo a rellenar</string>
+   </property>
+   <property name="verticalScrollBarPolicy">
+    <enum>Qt::ScrollBarAsNeeded</enum>
+   </property>
+   <property name="horizontalScrollBarPolicy">
+    <enum>Qt::ScrollBarAsNeeded</enum>
+   </property>
+   <property name="autoScroll">
+    <bool>true</bool>
+   </property>
+   <property name="autoScrollMargin">
+    <number>0</number>
+   </property>
+   <property name="verticalScrollMode">
+    <enum>QAbstractItemView::ScrollPerPixel</enum>
+   </property>
+   <property name="horizontalScrollMode">
+    <enum>QAbstractItemView::ScrollPerPixel</enum>
+   </property>
+   <property name="cornerButtonEnabled">
+    <bool>true</bool>
+   </property>
+   <property name="rowCount">
+    <number>5</number>
+   </property>
+   <property name="columnCount">
+    <number>2</number>
+   </property>
+   <attribute name="horizontalHeaderCascadingSectionResizes">
+    <bool>false</bool>
+   </attribute>
+   <attribute name="horizontalHeaderStretchLastSection">
+    <bool>false</bool>
+   </attribute>
+   <attribute name="verticalHeaderVisible">
+    <bool>true</bool>
+   </attribute>
+   <attribute name="verticalHeaderCascadingSectionResizes">
+    <bool>false</bool>
+   </attribute>
+   <attribute name="verticalHeaderHighlightSections">
+    <bool>true</bool>
+   </attribute>
+   <row/>
+   <row/>
+   <row/>
+   <row/>
+   <row/>
+   <column/>
+   <column/>
+  </widget>
+  <widget class="QListWidget" name="listWidget">
+   <property name="geometry">
+    <rect>
+     <x>750</x>
+     <y>70</y>
+     <width>221</width>
+     <height>341</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>Seleccione el valor a introducir en la tabla</string>
+   </property>
+   <property name="statusTip">
+    <string/>
+   </property>
+   <property name="horizontalScrollBarPolicy">
+    <enum>Qt::ScrollBarAlwaysOn</enum>
+   </property>
+   <property name="autoScroll">
+    <bool>true</bool>
+   </property>
+   <property name="alternatingRowColors">
+    <bool>true</bool>
+   </property>
+   <property name="horizontalScrollMode">
+    <enum>QAbstractItemView::ScrollPerItem</enum>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="bttGuardar">
+   <property name="geometry">
+    <rect>
+     <x>730</x>
+     <y>420</y>
+     <width>131</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>Guarda los cambios del elemento</string>
+   </property>
+   <property name="text">
+    <string>Guardar cambios</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="bttTerminar">
+   <property name="geometry">
+    <rect>
+     <x>860</x>
+     <y>420</y>
+     <width>111</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>Termina la introduccion de datos del elemento</string>
+   </property>
+   <property name="text">
+    <string>Terminar</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>10</y>
+     <width>221</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Datos del elemento. Elija un campo:</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="lbLista">
+   <property name="geometry">
+    <rect>
+     <x>750</x>
+     <y>20</y>
+     <width>201</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Valores del campo seleccionado:</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="lbEstado">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>490</y>
+     <width>951</width>
+     <height>101</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="tbId_trabajo">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="geometry">
+    <rect>
+     <x>120</x>
+     <y>420</y>
+     <width>121</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <property name="readOnly">
+    <bool>false</bool>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="tbSrc_trabajo">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="geometry">
+    <rect>
+     <x>120</x>
+     <y>440</y>
+     <width>121</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <property name="readOnly">
+    <bool>false</bool>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_2">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>420</y>
+     <width>81</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>ID del trabajo:</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_3">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>440</y>
+     <width>101</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>SRC del trabajo:</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="bttEditar">
+   <property name="geometry">
+    <rect>
+     <x>640</x>
+     <y>420</y>
+     <width>91</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Editar</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="bttBuscar">
+   <property name="geometry">
+    <rect>
+     <x>490</x>
+     <y>420</y>
+     <width>71</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Buscar</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="bttDescargar">
+   <property name="geometry">
+    <rect>
+     <x>270</x>
+     <y>420</y>
+     <width>121</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Descargar archivo</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="bttNuevo">
+   <property name="geometry">
+    <rect>
+     <x>560</x>
+     <y>420</y>
+     <width>81</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Nuevo</string>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="txtFiltrar">
+   <property name="geometry">
+    <rect>
+     <x>750</x>
+     <y>40</y>
+     <width>221</width>
+     <height>31</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="bttBorrar">
+   <property name="geometry">
+    <rect>
+     <x>390</x>
+     <y>420</y>
+     <width>101</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>Borra este registro</string>
+   </property>
+   <property name="text">
+    <string>Borrar </string>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="tbMunicipio">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="geometry">
+    <rect>
+     <x>120</x>
+     <y>460</y>
+     <width>381</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <property name="readOnly">
+    <bool>false</bool>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_4">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>460</y>
+     <width>101</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Municipio:</string>
+   </property>
+  </widget>
+  <zorder>listWidget</zorder>
+  <zorder>bttGuardar</zorder>
+  <zorder>bttTerminar</zorder>
+  <zorder>label</zorder>
+  <zorder>lbLista</zorder>
+  <zorder>tableWidget</zorder>
+  <zorder>lbEstado</zorder>
+  <zorder>tbId_trabajo</zorder>
+  <zorder>tbSrc_trabajo</zorder>
+  <zorder>label_2</zorder>
+  <zorder>label_3</zorder>
+  <zorder>bttEditar</zorder>
+  <zorder>bttBuscar</zorder>
+  <zorder>bttDescargar</zorder>
+  <zorder>bttNuevo</zorder>
+  <zorder>txtFiltrar</zorder>
+  <zorder>bttBorrar</zorder>
+  <zorder>tbMunicipio</zorder>
+  <zorder>label_4</zorder>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

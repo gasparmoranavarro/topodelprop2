@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>dlgDocumentos</class>
+ <widget class="QDialog" name="dlgDocumentos">
+  <property name="windowModality">
+   <enum>Qt::WindowModal</enum>
+  </property>
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>761</width>
+    <height>272</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Archivos asociados al trabajo</string>
+  </property>
+  <property name="toolTip">
+   <string>Añade archivos al trabajo</string>
+  </property>
+  <property name="modal">
+   <bool>true</bool>
+  </property>
+  <widget class="QTableWidget" name="tableWidget">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>40</y>
+     <width>721</width>
+     <height>192</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="bttAadir">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>240</y>
+     <width>131</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>Añade una fila a la tabla para añadir un documento</string>
+   </property>
+   <property name="text">
+    <string>Agregar documento</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="bttEliminar">
+   <property name="geometry">
+    <rect>
+     <x>160</x>
+     <y>240</y>
+     <width>131</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>Elimina la fila actual</string>
+   </property>
+   <property name="text">
+    <string>Eliminar documento</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="bttTerminar">
+   <property name="geometry">
+    <rect>
+     <x>660</x>
+     <y>240</y>
+     <width>81</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>Sale de este cuadro de diálogo</string>
+   </property>
+   <property name="text">
+    <string>Terminar</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="bttGuardar">
+   <property name="geometry">
+    <rect>
+     <x>580</x>
+     <y>240</y>
+     <width>75</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>Guarda los datos en el disco local</string>
+   </property>
+   <property name="text">
+    <string>Guardar</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>20</y>
+     <width>541</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Introduzca los datos de los archivos a almacenar:</string>
+   </property>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

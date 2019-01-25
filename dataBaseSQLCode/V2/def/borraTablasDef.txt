@@ -1,0 +1,45 @@
+--COMUN
+drop table comun.planos cascade;
+drop table comun.memorias cascade;
+drop table comun.div_vert cascade;
+drop table comun.documentos_estudiados cascade;
+drop table comun.clientes cascade;
+drop table comun.propietarios;
+drop table comun.trabajos_hist cascade;
+drop table comun.trabajos cascade;
+drop table comun.usuarios cascade;
+drop table comun.division cascade;
+drop table comun.segregacion cascade;
+drop table comun.agrupacion cascade;
+
+--DOMINIOS
+
+drop table dom.config cascade;
+drop table dom.activado cascade;
+drop table dom.tipo_firma cascade;
+drop table dom.tipo_colindante cascade;
+drop table dom.tipo_lin_proyec cascade;
+drop table dom.modo_obt_linde cascade;
+drop table dom.opinion_colindantes cascade;
+drop table dom.lugar_medicion cascade;
+drop table dom.tipo_material cascade;
+drop table dom.tip_lin_terr cascade;
+drop table dom.tipo_linde cascade;
+drop table dom.tipo_elem_int cascade;
+drop table dom.tipo_servidumbre cascade;
+drop table dom.tipo_finca cascade;
+drop table dom.provincia cascade;
+drop table dom.municipio cascade;
+drop table dom.equipo_utilizado cascade;
+drop table dom.tipo_trabajo cascade;
+drop table dom.motivo_trabajo cascade;
+drop table dom.tipo_documento cascade;
+drop table dom.estado_trabajo cascade;
+drop table dom.fecha_dom cascade;
+drop table dom.src_trabajo cascade;
+drop table dom.tipo_usuario cascade;
+drop table dom.finca_matriz cascade;
+drop table dom.presente_medicion cascade;
+drop table dom.tipo_finca_catastral cascade;
+drop table dom.tipo_propietario cascade;
+drop table dom.cfg_tamanos cascade;

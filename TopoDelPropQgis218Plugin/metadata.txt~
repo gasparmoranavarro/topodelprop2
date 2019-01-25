@@ -1,0 +1,42 @@
+# This file contains metadata for your plugin. Beginning
+# with version 1.8 this is the preferred way to supply information about a
+# plugin. The current method of embedding metadata in __init__.py will
+# be supported until version 2.0
+
+# This file should be included when you package your plugin.
+
+# Mandatory items:
+
+
+[general]
+name=TopoDelProp
+qgisMinimumVersion=2.0
+description=
+	Cadastre. Tool for managing geographic data and metadata to support a legal cadastre. 
+	You can make a empty database for your country. Automatic functions in the database
+	force you to have the data and topology correct. Press help button for use instructions.
+	Important: It needs to install pyUPVBib plugin for to work.
+version=0.6
+author=Joaquin Gaspar Mora Navarro
+email=topodelprop@gmail.com
+
+# end of mandatory metadata
+
+# Optional items:
+
+# Uncomment the following line and add your changelog entries:
+# changelog=
+
+# tags are comma separated with spaces allowed
+tags=cadastre, boundary, delimitation, property, topography, metadata
+
+homepage=
+tracker=da
+repository=
+icon=icon.png
+# experimental flag
+experimental=True
+
+# deprecated flag (applies to the whole plugin, not just a single version
+deprecated=False
+

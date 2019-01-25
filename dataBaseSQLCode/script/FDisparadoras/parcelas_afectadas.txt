@@ -1,0 +1,21 @@
+
+begin;
+
+CREATE OR REPLACE FUNCTION script.parcelas_afectadas() RETURNS trigger AS $$
+	/*
+	Autor: Gaspar Mora Navarro. Universidad Politécnica de Valencia.
+	Introduce de forma automatica los valores:
+	areavalue: el area
+	beginlifespanversion: la el timestamp actual
+	localid y label: igual que nationalcadastralreference
+	*/
+  BEGIN
+	NEW.areavalue:=ST_area(NEW.geom);
+	NEW.beginlifespanversion:=now();
+	NEW.localid:=NEW.nationalcadastralreference;
+	NEW.label:=NEW.nationalcadastralreference;
+    return NEW;
+  END;
+$$ LANGUAGE 'plpgsql';
+
+commit;

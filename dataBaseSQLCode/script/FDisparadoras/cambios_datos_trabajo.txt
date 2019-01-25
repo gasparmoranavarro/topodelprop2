@@ -1,0 +1,71 @@
+begin;
+
+CREATE OR REPLACE FUNCTION script.cambios_datos_trabajo() RETURNS trigger AS $$
+/*
+	Autor: Gaspar Mora Navarro. Universidad Politécnica de Valencia.
+	Este disparador se usa en la tabla ed_comun.ed_trabajos antes de UPDATE o DEETE.
+	Impide las siguientes acciones:
+		- Que otro usuario pueda eliminar o cambiar un trabajo que no es suyo.
+		- Que el usuario autor del trabajo, pueda cambiar el autor del trabajo.
+		- Que ni siquiera el administrador pueda cambiar el src_trabajo,
+			ya que esto implica eliminar registros de un src e insertarlos en
+			otro. Esto todavía no está programado. Habría que añadirlo a este
+			disparador.
+*/
+  DECLARE
+	autor Varchar;--autor del trabajo que se quiere modificar
+	tipo_usuario varchar;--tipo de usuario que está trabajando
+	id_trab_actual integer;--id del trabajo que quiere modificar
+  BEGIN
+
+	--para que no pueda cambiar el identificador del trabaj, el usuario o el src
+	if TG_OP='UPDATE' then
+		if NEW.id_trabajo <> OLD.id_trabajo then
+			raise exception 'No puede cambiar el identificador del trabajo';
+		end if;
+
+		if NEW.usuario <> OLD.usuario then
+			raise exception 'No puede cambiar el autor del trabajo';
+		end if;
+
+		if NEW.src_trabajo <> OLD.src_trabajo then
+			raise exception 'No puede cambiar el SRC del trabajo';
+		end if;
+	end if;
+
+	select comun.usuarios.tipo_usuario into tipo_usuario from comun.usuarios where usuario=current_user;
+
+	--si no esta en la tabla comun.usuarios no puede continuar
+	if not found then
+		raise exception 'El usuario actual (%) no esta dado de alta con la aplicacion UPVDelProp. No tiene acceso a las tablas. Pongase en contacto con el adminsitrador.',current_user;
+	end if;
+
+	-- si es administrador puede continuar
+	-- raise notice 'tipo usuario %',tipo_usuario;
+	if tipo_usuario = 'admin_propiedad' then
+		if TG_OP='UPDATE' then
+			--raise notice 'Aceptado con NEW. Tipo usuario admin_propiedad';
+			return NEW;
+		else
+			--raise notice 'Aceptado con OLD. Tipo usuario admin_propiedad';
+			return OLD;
+        	end if;
+	end if;
+
+
+	-- si no es el autor no puede realizar los cambios
+	if OLD.usuario<>current_user then
+		raise exception 'No puede cambiar un trabajo de otro usuario';
+	else	
+		if TG_OP='UPDATE' then
+			--raise notice 'Aceptado con NEW. Autor del trabajo';
+			return NEW;
+		else
+			--raise notice 'Aceptado con OLD. Autor del trabajo';
+			return OLD;
+        	end if;
+	end if;
+  END;
+$$ LANGUAGE 'plpgsql';
+
+commit;

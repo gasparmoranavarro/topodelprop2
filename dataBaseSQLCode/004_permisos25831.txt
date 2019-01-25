@@ -1,0 +1,23 @@
+begin;
+
+grant usage on schema src25831 to consultor_autorizado;
+grant usage on schema ed_src25831, src25831 to editor,admin_propiedad;
+grant usage on schema src25831 to consultor;
+grant select on src25831.fincas to consultor,editor;
+grant select on src25831.lindes to consultor,editor;
+grant select on src25831.servidumbres to consultor,editor;
+grant select on src25831.elem_interiores to consultor,editor;
+grant select on src25831.img_linde to consultor,editor;
+grant select on src25831.img_elem_int to consultor,editor;
+grant select on src25829.parcelas_afectadas to consultor,editor;
+
+grant select (usuario,tipo_usuario) on comun.usuarios to editor;--solo sobre esas colunas. 
+grant select on all tables in schema src25831 to consultor_autorizado;
+grant select,insert,update,delete on all tables in schema ed_src25831 to editor,admin_propiedad;
+grant select,insert,delete,update on all tables in schema src25831 to admin_propiedad;
+
+--permiso para utilizar las secuencias de los campos serial de todas las tablas
+grant usage on all sequences in schema comun,dom,src25831 to admin_propiedad;
+grant usage on all sequences in schema ed_comun,ed_src25831 to admin_propiedad,editor;
+
+commit;

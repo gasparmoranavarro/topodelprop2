@@ -1,0 +1,224 @@
+begin;
+
+--Linde
+
+create table src25830.lindes(gid serial primary key, id_trabajo integer not null, tipo_linde varchar(50), opinion_colindantes varchar(100), descripcion_fisica varchar(100), lon_utm double precision);
+
+select addgeometrycolumn('src25830','lindes','geom',25830,'LINESTRING',2, false);
+
+alter table  src25830.lindes  add constraint caj_linde_ntrab foreign key (id_trabajo) references comun.trabajos(id_trabajo) on update cascade on delete cascade;
+
+alter table  src25830.lindes  add constraint caj_linde_tipo_linde foreign key (tipo_linde) references dom.tipo_linde(tipo_linde) on update cascade on delete cascade;
+
+alter table  src25830.lindes  add constraint caj_linde__opi_col foreign key (opinion_colindantes) references dom.opinion_colindantes(opinion_colindantes) on update cascade on delete cascade;
+
+--IMAGENES DE CADA LINDE
+create table src25830.img_linde (gid serial primary key, id_trabajo integer not null, gid_linde integer not null, descripcion varchar(100), nom_arch varchar(20) not null, archivo bytea, constraint r1_img_linde unique (gid_linde,nom_arch));
+
+select addgeometrycolumn('src25830','img_linde','geom',25830,'POINT',2, false);
+
+alter table src25830.img_linde add constraint caj_img_linde_ntrab foreign key (id_trabajo) references comun.trabajos(id_trabajo) on update cascade on delete cascade;
+
+alter table src25830.img_linde add constraint caj_gid_linde foreign key (gid_linde) references  src25830.lindes (gid) on update cascade on delete cascade;
+
+--COLINDANTES DE CADA LINDE
+create table src25830.colindantes (id serial primary key, id_trabajo integer not null, gid_linde integer not null, tipo_colindante varchar(30), tipo_firma varchar(30), presente_medicion boolean, dni integer, nombre1 varchar(50), nombre2 varchar(50), apellido1 varchar(50), apellido2 varchar(50),telefono integer, email varchar(100), nom_arch varchar(20) not null,archivo bytea, constraint r1_colin_linde unique (gid_linde,dni));
+
+alter table src25830.colindantes add constraint caj_colin_ntrab foreign key (id_trabajo) references comun.trabajos(id_trabajo) on update cascade on delete cascade;
+
+alter table src25830.colindantes add constraint caj_gid_linde foreign key (gid_linde) references  src25830.lindes (gid) on update cascade on delete cascade;
+
+alter table src25830.colindantes add constraint caj_tipo_firma foreign key (tipo_firma) references dom.tipo_firma(tipo_firma) on update cascade on delete cascade;
+
+alter table src25830.colindantes add constraint caj_tipo_colindante foreign key (tipo_colindante) references dom.tipo_colindante(tipo_colindante) on update cascade on delete cascade;
+
+--Fincas
+create table src25830.fincas(gid serial primary key, id_trabajo integer not null unique, num_registro integer,precision_cm double precision not null, tomo smallint, libro smallint, folio integer, num_finca integer, descripcion_fisica varchar(100), tipo_finca_catastral varchar(8),tipo_finca varchar(40), finca_matriz boolean,area_utm double precision,area_elip double precision, perim_utm double precision,e_max_area_99 double precision);
+
+select addgeometrycolumn('src25830','fincas','geom',25830,'MULTIPOLYGON',2, false);
+
+alter table src25830.fincas add constraint caj_fincas_ntrab foreign key (id_trabajo) references comun.trabajos(id_trabajo) on update cascade on delete cascade;
+
+alter table src25830.fincas add constraint caj_fincas_tipo foreign key (tipo_finca) references dom.tipo_finca(tipo_finca) on update cascade on delete cascade;
+
+alter table src25830.fincas add constraint caj_fincas_tipo_cat foreign key (tipo_finca_catastral) references dom.tipo_finca_catastral(tipo_finca_catastral) on update cascade on delete cascade;
+
+--DIVISIONES VERTICALES
+create table src25830.div_vert(gid serial primary key, id_trabajo integer not null, num_registro smallint not null, tomo smallint not null, libro smallint not null, folio integer not null, num_finca integer not null, descripcion_fisica varchar(100), tipo_finca varchar(40), finca_matriz boolean);
+
+select addgeometrycolumn('src25830','div_vert','geom',25830,'MULTIPOLYGON',2, false);
+
+alter table src25830.div_vert add constraint caj_fincas_ntrab foreign key (id_trabajo) references comun.trabajos(id_trabajo) on update cascade on delete cascade;
+
+alter table src25830.div_vert add constraint caj_fincas_tipo foreign key (tipo_finca) references dom.tipo_finca(tipo_finca) on update cascade on delete cascade;
+
+--Servidumbres
+create table src25830.servidumbres(gid serial primary key, id_trabajo integer not null, tipo_servidumbre varchar(100), descripcion varchar(100),area_utm double precision,precision_cm double precision not null, e_max_area_99 double precision, area_elip double precision, perim_utm double precision);
+
+select addgeometrycolumn('src25830','servidumbres','geom',25830,'MULTIPOLYGON',2, false);
+
+alter table src25830.servidumbres add constraint caj_servidumbres_ntrab foreign key (id_trabajo) references comun.trabajos(id_trabajo) on update cascade on delete cascade;
+
+alter table src25830.servidumbres add constraint caj_servidumbres_tipo foreign key (tipo_servidumbre) references dom.tipo_servidumbre(tipo_servidumbre) on update cascade on delete cascade;
+
+--ACTAS DESLINDE
+create table src25830.actas_deslinde (id serial primary key, id_trabajo integer not null, gid_linde integer not null, descripcion varchar(100), nom_arch varchar(20) not null, archivo bytea, constraint r1_acta_linde unique (gid_linde));
+alter table src25830.actas_deslinde add constraint caj_acta_des_ntrab foreign key (id_trabajo) references comun.trabajos(id_trabajo) on update cascade on delete cascade;
+alter table src25830.actas_deslinde add constraint caj_elem_acta_des_nlin foreign key (gid_linde) references  src25830.lindes (gid) on update cascade on delete cascade;
+
+
+--Linde existente
+
+create table src25830.linde_existente(id serial primary key, id_trabajo integer not null, gid_linde integer not null, tip_lin_terr varchar(100), tipo_material varchar(100), lugar_medicion varchar(100), prec_med_cm double precision not null, indeterminacion_cm double precision not null,constraint r1_exis_linde unique (gid_linde,id_trabajo));
+
+
+alter table src25830.linde_existente add constraint caj_lin_ex_ntrab foreign key (id_trabajo) references comun.trabajos(id_trabajo) on update cascade on delete cascade;
+
+alter table src25830.linde_existente add constraint caj_lin_ex_gid_linde foreign key (gid_linde) references  src25830.lindes (gid) on update cascade on delete cascade;
+alter table src25830.linde_existente add constraint caj_lin_ex_tipo_mat foreign key (tipo_material) references dom.tipo_material(tipo_material) on update cascade on delete cascade;
+alter table src25830.linde_existente add constraint caj_lin_ex_lugar_med foreign key (lugar_medicion) references dom.lugar_medicion(lugar_medicion) on update cascade on delete cascade;
+alter table src25830.linde_existente add constraint caj_lin_ex_tipo_terr foreign key (tip_lin_terr) references dom.tip_lin_terr(tip_lin_terr) on update cascade on delete cascade;
+
+--Linde digitalizado
+
+create table src25830.linde_digitalizado(id serial primary key, id_trabajo integer not null, gid_linde integer not null, nombre_orto varchar(20), fecha_vuelo date, precison_nominal_cm double precision not null, indeterminacion_cm double precision not null,constraint r1_digit_linde unique (gid_linde,id_trabajo));
+
+
+alter table src25830.linde_digitalizado add constraint caj_lin_dig_ntrab foreign key (id_trabajo) references comun.trabajos(id_trabajo) on update cascade on delete cascade;
+
+alter table src25830.linde_digitalizado add constraint caj_lin_dig_gid_linde foreign key (gid_linde) references src25830.lindes(gid) on update cascade on delete cascade;
+
+--LINDE REPLANTEADO
+create table src25830.linde_replanteado(id serial primary key, id_trabajo integer not null, gid_linde integer not null, modo_obt_linde varchar(100), em_encaje_cm double precision not null, prec_rep_cm double precision not null,constraint r1_rep_linde unique (gid_linde,id_trabajo));
+
+alter table src25830.linde_replanteado add constraint caj_lin_rep_ntrab foreign key (id_trabajo) references comun.trabajos(id_trabajo) on update cascade on delete cascade;
+alter table src25830.linde_replanteado add constraint caj_lin_rep_gid_linde foreign key (gid_linde) references src25830.lindes(gid) on update cascade on delete cascade;
+
+alter table src25830.linde_replanteado add constraint caj_modo_obt_linde foreign key (modo_obt_linde) references dom.modo_obt_linde(modo_obt_linde) on update cascade on delete cascade;
+
+--Linde proyectado
+create table src25830.linde_proyectado(id serial primary key, id_trabajo integer not null,gid_linde integer not null, tipo_lin_proyec varchar(100), em_encaje_cm double precision not null, prec_rep_cm double precision not null,constraint r1_proy_linde unique (gid_linde,id_trabajo));
+
+alter table src25830.linde_proyectado add constraint caj_lin_proy_ntrab foreign key (id_trabajo) references comun.trabajos(id_trabajo) on update cascade on delete cascade;
+alter table src25830.linde_proyectado add constraint caj_lin_proy_gid_linde foreign key (gid_linde) references src25830.lindes(gid) on update cascade on delete cascade;
+alter table src25830.linde_proyectado add constraint caj_lin_proy_tipo foreign key (tipo_lin_proyec) references dom.tipo_lin_proyec(tipo_lin_proyec) on update cascade on delete cascade;
+
+--ELEMENTOS INTERIORES
+create table src25830.elem_interiores (gid serial primary key, id_trabajo integer not null, tipo_elem_int varchar(100), descripcion varchar (100), precision_cm double precision not null,area_utm double precision,area_elip double precision, perim_utm double precision,e_max_area_99 double precision);
+
+select addgeometrycolumn('src25830','elem_interiores','geom',25830,'MULTIPOLYGON',2, false);
+
+alter table src25830.elem_interiores add constraint caj_elem_int_ntrab foreign key (id_trabajo) references comun.trabajos(id_trabajo) on update cascade on delete cascade;
+alter table src25830.elem_interiores add constraint caj_elem_int_tipo foreign key (tipo_elem_int) references dom.tipo_elem_int(tipo_elem_int) on update cascade on delete cascade;
+
+--IMAGENES DE LOS ELEMENTOS INTERIORES
+create table src25830.img_elem_int(id serial primary key, id_trabajo integer not null, gid_elem_int integer not null, descripcion varchar(100), nom_arch varchar(20) not null, archivo bytea, constraint r1_img_elem_int unique (gid_elem_int,nom_arch));
+alter table src25830.img_elem_int add constraint caj_elem_int_img_ntrab foreign key (id_trabajo) references comun.trabajos(id_trabajo) on update cascade on delete cascade;
+alter table src25830.img_elem_int add constraint caj_elem_int_img_nelem foreign key (gid_elem_int) references src25830.elem_interiores(gid) on update cascade on delete cascade;
+
+
+--REFERENCIA CATASTRAL URBANA
+create table src25830.ref_cat_urb (id serial primary key, id_trabajo integer not null,gid_finca integer not null, ref_cat_urb varchar(20) not null, constraint r1_ref_urb_finca unique (gid_finca,ref_cat_urb));
+
+alter table src25830.ref_cat_urb add constraint caj_r_c_u_ntrab foreign key (id_trabajo) references comun.trabajos(id_trabajo) on update cascade on delete cascade;
+
+alter table src25830.ref_cat_urb add constraint caj_r_c_u_gid_finca foreign key (gid_finca) references src25830.fincas(gid) on update cascade on delete cascade;
+
+--REFERENCIA CATASTRAL RUSTICA
+create table src25830.ref_cat_rus (id serial primary key, id_trabajo integer not null,gid_finca integer  not null, ref_cat_rus varchar(20) not null, constraint r1_ref_rus_finca unique (gid_finca,ref_cat_rus));
+
+alter table src25830.ref_cat_rus add constraint caj_r_c_r_ntrab foreign key (id_trabajo) references comun.trabajos(id_trabajo) on update cascade on delete cascade;
+
+alter table src25830.ref_cat_rus add constraint caj_r_c_r_gid_finca foreign key (gid_finca) references src25830.fincas(gid) on update cascade on delete cascade;
+
+--ERRORES TOPOLOGICOS
+--capas para mostrar los errores topologicos de la capa fincas
+--superposiciones (overlaps)
+
+create table src25830.overlaps_fincas(gid serial primary key, id_trabajo integer not null, area_utm double precision, perim_utm double precision);
+
+select addgeometrycolumn('src25830','overlaps_fincas','geom',25830,'MULTIPOLYGON',2, false);
+
+alter table src25830.overlaps_fincas add constraint caj_over_fincas_ntrab foreign key (id_trabajo) references comun.trabajos(id_trabajo) on update cascade on delete cascade;
+
+--Huecos entre poligonos (gaps)
+create table src25830.gaps_fincas(gid serial primary key, id_trabajo integer not null, lon_utm double precision);
+
+select addgeometrycolumn('src25830','gaps_fincas','geom',25830,'MULTILINESTRING',2, false);
+
+alter table src25830.gaps_fincas add constraint caj_gaps_fincas_ntrab foreign key (id_trabajo) references comun.trabajos(id_trabajo) on update cascade on delete cascade;
+
+--DEFINITIVAS
+
+/*
+--ELEMENTOS INTERIORES
+--superposiciones (overlaps)
+
+create table src25830.overlaps_elem_interiores(gid serial primary key, id_trabajo integer not null, area_utm double precision, perim_utm double precision);
+
+select addgeometrycolumn('src25830','overlaps_elem_interiores','geom',25830,'MULTIPOLYGON',2, false);
+
+alter table src25830.overlaps_elem_interiores add constraint caj_over_ei_ntrab foreign key (id_trabajo) references comun.trabajos(id_trabajo) on update cascade on delete cascade;
+
+--Huecos entre poligonos (gaps)
+create table src25830.gaps_elem_interiores(gid serial primary key, id_trabajo integer not null, lon_utm double precision);
+
+select addgeometrycolumn('src25830','gaps_elem_interiores','geom',25830,'MULTILINESTRING',2, false);
+
+alter table src25830.gaps_elem_interiores add constraint caj_gaps_ei_ntrab foreign key (id_trabajo) references comun.trabajos(id_trabajo) on update cascade on delete cascade;
+
+--SERVIDUMBRES
+--superposiciones (overlaps)
+
+create table src25830.overlaps_servidumbres(gid serial primary key, id_trabajo integer not null, precision_cm double precision not null, e_max_area_99 double precision, area_utm double precision, perim_utm double precision);
+
+select addgeometrycolumn('src25830','overlaps_servidumbres','geom',25830,'MULTIPOLYGON',2, false);
+
+alter table src25830.overlaps_servidumbres add constraint caj_over_servidumbres_ntrab foreign key (id_trabajo) references ed_comun.ed_trabajos(id_trabajo) on update cascade on delete cascade;
+
+--Huecos entre poligonos (gaps)
+create table src25830.gaps_servidumbres(gid serial primary key, id_trabajo integer not null, lon_utm double precision);
+
+select addgeometrycolumn('src25830','gaps_servidumbres','geom',25830,'MULTILINESTRING',2, false);
+
+alter table src25830.gaps_servidumbres add constraint caj_gaps_servi_ntrab foreign key (id_trabajo) references ed_comun.ed_trabajos(id_trabajo) on update cascade on delete cascade;
+
+*/
+--INDICES NO ESPACIALES
+create index idx_lindes_id_trab on src25830.lindes(id_trabajo);
+create index idx_servidumbres_id_trab on src25830.servidumbres(id_trabajo);
+create index idx_fincas_id_trab on src25830.fincas(id_trabajo);
+create index idx_colindantes_id_trab on src25830.colindantes(id_trabajo);
+create index idx_elem_interiores_id_trab on src25830.elem_interiores(id_trabajo);
+create index idx_img_elem_int_id_trab on  src25830.img_elem_int(id_trabajo);
+create index idx_ref_cat_urb_id_trab on  src25830.ref_cat_urb(id_trabajo);
+create index idx_ref_cat_rus_id_trab on src25830.ref_cat_rus(id_trabajo);
+create index idx_actas_deslinde_id_trab on src25830.actas_deslinde(id_trabajo);
+create index idx_img_linde_id_trab on src25830.img_linde(id_trabajo);
+
+--CREACION DE INDICES ESPACIALES
+create index ie_fincas_gist on src25830.fincas using gist(geom);
+create index ie_lindes_gist on src25830.fincas using gist(geom);
+create index ie_elem_int_gist on src25830.fincas using gist(geom);
+create index ie_servidum_gist on src25830.fincas using gist(geom);
+
+
+commit;
+
+--los vacuum deben ir fuera de la transaccion
+vacuum analyze src25830.lindes;
+vacuum analyze src25830.servidumbres;
+vacuum analyze src25830.fincas;
+vacuum analyze src25830.colindantes;
+vacuum analyze src25830.elem_interiores;
+vacuum analyze src25830.img_elem_int;
+vacuum analyze src25830.ref_cat_urb;
+vacuum analyze src25830.ref_cat_rus;
+vacuum analyze src25830.actas_deslinde;
+vacuum analyze src25830.img_linde;
+
+vacuum analyze src25830.fincas;
+vacuum analyze src25830.lindes;
+vacuum analyze src25830.elem_interiores;
+vacuum analyze src25830.servidumbres;
+

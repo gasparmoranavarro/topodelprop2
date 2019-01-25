@@ -1,0 +1,36 @@
+--			TABLAS EDICION CON GEOMETRIA
+--------------------------------------------------------------
+
+--LOS NOMBRES DE LAS TABLAS NO PUEDEN TENER ESPACIOS, NI ACENTOS, NI EÑES.
+--LO MISMO OCURRE CON LOS NOMBRES DE LOS CAMPOS. LA APLICACIÓN NO FUNCIONARÍA.
+
+--Para pasar de tablas definitivas a tablas de edicion:
+--	Sustituir src25830 por ed_src25830 
+--	Sustituir comun.trabajos por ed_comun.ed_trabajos
+--Para crear las tablas en otro esquema. (primero crear el esquema)
+--	Sustituir src25830 por srcXXXXX, o bien
+--	Sustituir ed_src25830 por ed_srcXXXXX
+
+begin;
+
+
+--parcelas afectadas
+create table ed_src25830.ed_parcelas_afectadas(gid serial primary key, id_trabajo integer not null, gid_finca integer, 
+	localid varchar,namespace varchar not null, nationalcadastralreference varchar(20) not null, 
+	areavalue double precision  not null,label varchar,endlifespanversion timestamp,beginlifespanversion timestamp  not null);
+
+select addgeometrycolumn('ed_src25830','ed_parcelas_afectadas','geom',25830,'MULTIPOLYGON',2, false);
+
+alter table ed_src25830.ed_parcelas_afectadas add constraint caj_parcelas_afectadas_ntrab foreign key (id_trabajo) references ed_comun.ed_trabajos(id_trabajo) on update cascade on delete cascade;
+
+alter table ed_src25830.ed_parcelas_afectadas add constraint caj_gid_finca foreign key (gid_finca) references ed_src25830.ed_fincas(gid) on update cascade on delete cascade;
+
+create index ie_ed_parcelas_afectadas_gist on ed_src25830.ed_parcelas_afectadas using gist(geom);
+
+commit;
+
+vacuum analyze ed_src25830.ed_parcelas_afectadas;
+
+
+
+

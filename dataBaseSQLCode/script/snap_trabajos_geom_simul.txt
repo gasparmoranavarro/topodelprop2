@@ -1,0 +1,192 @@
+begin;
+
+CREATE OR REPLACE FUNCTION script.snap_trabajos_geom_simul(geom_fija geometry,nom_tabla varchar) RETURNS boolean AS $$
+/*Autor: Gaspar Mora Navarro. Universidad Politécnica de Valecncia.
+	Snapa las fincas del srcXXXXX.fincas, o ed_srcXXXXX.ed_fincas sobre la finca de geometria geom_fija. Luego snapa los demás elementos de cada trabajo snapado.
+	Utiliza como distancia de snap el valor dist_snap_trabajos, de la tabla dom.cfg_tamanos
+
+Parámetros:
+	geom_fija geometry:geometría de la finca de referencia
+	nom_tabla varchar:tabla con las fincas a snapar, incluido el esquema
+Return:
+	True si llega al final de la función
+	Raise exception si hay algún problema
+*/
+DECLARE
+	cur refcursor;
+	registro record;
+	id_trab integer;
+	distancia_busc double precision;
+	tipo_tr_snapar varchar;
+	resp boolean;
+BEGIN
+	select dist_snap_trabajos into distancia_busc from dom.cfg_tamanos where id>0;
+	if not found then
+		raise exception 'Hay un problema con la tabla dom.cfg_tamanos y el valor del campo dist_snap_trabajos';
+	end if;
+	if substring(nom_tabla,1,3)='ed_' then
+		tipo_tr_snapar:='edicion';
+	else
+		tipo_tr_snapar:='definitivo';
+	end if;
+	cur:=script.select_trab_cerca_geom(geom_fija, nom_tabla, distancia_busc);
+	loop
+		fetch cur into registro;
+		exit when not found;
+		raise notice 'id: %', registro.id_trabajo;
+		resp:=script.snap_trabajo_a2b_geom(registro.id_trabajo,tipo_tr_snapar, geom_fija, distancia_busc);
+	end loop;
+	close cur;
+	return true;
+END;
+$$ LANGUAGE 'plpgsql';
+
+commit;
+
+begin;
+
+CREATE OR REPLACE FUNCTION script.snap_trabajo_a2b_geom(id_tr_snapar integer,tipo_tr_snapar varchar, geom_finca_fija geometry, distancia_snap double precision) RETURNS boolean AS $$
+/*Autor: Gaspar Mora Navarro. Universidad Politécnica de Valecncia.
+	Snapa la finca del id_tr_snapar sobre la finca de geometría geom_finca_fija. Luego snapa los demás elementos del trabajo id_tr_snapar sobre la nueva forma snapada de su finca.
+Parámetros:
+	id_tr_snapar integer: id_trabajo del trabajo cuya finca se va a snapar
+	tipo_tr_snapar varchar: puede ser 'edicion' o 'definitivo'
+	geom_finca_fija geometry: geometría de la finca utilizada para snapar la finca del trabajo id_tr_snapar
+	distancia_snap double precision: Distancia utilizada para st_snap.
+Return:
+	True si llega al final de la función
+	Raise exception si hay algún problema
+*/
+DECLARE
+	geom_finca_snapar geometry;
+	resp boolean;
+	src_trab varchar;
+	nom_tabla_finca_snapar varchar;
+	consulta varchar;
+	nueva_geom_finca geometry;
+	nueva_geom_linde geometry;
+	nueva_geom_ei geometry;
+	nueva_geom_serv geometry;
+	cur refcursor;
+	esquema varchar;
+	tabla varchar;
+	geom_snapada geometry;
+	fila record;
+	nom_tabla_finca varchar;
+BEGIN
+
+	if tipo_tr_snapar='definitivo' then
+		consulta:='src_trabajo into src_trab from comun.trabajos where id_trabajo=id_tr_snapar';
+		select src_trabajo into src_trab from comun.trabajos where id_trabajo=id_tr_snapar;
+		nom_tabla_finca:= 'src' || src_trab || '.fincas';
+		esquema:='src' || src_trab;
+		nom_tabla_finca_snapar:= esquema || '.fincas';
+
+	else
+		consulta:='src_trabajo into src_trab from ed_comun.ed_trabajos where id_trabajo=id_tr_snapar';
+		select src_trabajo into src_trab from ed_comun.ed_trabajos where id_trabajo=id_tr_snapar;
+		nom_tabla_finca:= 'ed_src' || src_trab || '.ed_fincas';
+		esquema:='ed_src' || src_trab;
+		nom_tabla_finca_snapar:= esquema || '.ed_fincas';
+	end if;
+
+
+	if not found then
+		raise exception 'Error en snap_trabajo_a2b_geom: La consulta % no produjo ningun resultado. id_tr_snapar:%',consulta, id_tr_snapar;
+	end if;	
+
+	consulta:='select geom from ' || nom_tabla_finca_snapar || ' where id_trabajo = $1';
+
+	execute consulta into geom_finca_snapar using id_tr_snapar;
+	
+	--snapo la finca
+	nueva_geom_finca:=st_multi(st_snap(geom_finca_snapar, geom_finca_fija,distancia_snap));
+	nueva_geom_finca:=script.comprueba_geom(nueva_geom_finca);
+	--raise notice 'Geometria despues comprueba_geom %', geometrytype(nueva_geom_finca);
+	
+	--actualizo la nueva geometria de la finca
+	consulta:='update ' || nom_tabla_finca_snapar || ' set geom=$1 where id_trabajo=$2';
+	execute consulta using nueva_geom_finca,id_tr_snapar;
+	
+	--Snapo los lindes a la finca
+	if tipo_tr_snapar='definitivo' then
+		tabla:= esquema || '.lindes';
+	else
+		tabla:= esquema || '.ed_lindes';
+	end if;
+
+	OPEN cur FOR EXECUTE 'SELECT gid,geom FROM ' || tabla || ' WHERE id_trabajo = $1' USING id_tr_snapar;	
+     	LOOP
+		FETCH cur INTO fila;
+		raise notice 'snapando linde gid: %', fila.gid;
+		EXIT WHEN NOT FOUND;
+		geom_snapada:=st_snap(fila.geom,nueva_geom_finca,distancia_snap);
+		geom_snapada:=script.comprueba_geom(geom_snapada);
+		raise notice 'geometria snapada';
+		consulta:='update ' || tabla || ' set geom=$1 where gid=$2';
+		execute consulta using geom_snapada,fila.gid;
+     	END LOOP;
+     	CLOSE cur;
+
+	--Elementos interiores
+	if tipo_tr_snapar='definitivo' then
+		tabla:= esquema || '.elem_interiores';
+	else
+		tabla:= esquema || '.ed_elem_interiores';
+	end if;
+	OPEN cur FOR EXECUTE 'SELECT gid,geom FROM ' || tabla || ' WHERE id_trabajo = $1' USING id_tr_snapar;	
+     	LOOP
+		FETCH cur INTO fila;
+		raise notice 'snapando elemento interior gid: %', fila.gid;
+		EXIT WHEN NOT FOUND;
+		geom_snapada:=st_multi(st_snap(fila.geom,nueva_geom_finca,distancia_snap));
+		geom_snapada:=script.comprueba_geom(geom_snapada);
+		raise notice 'geometria snapada';
+		consulta:='update ' || tabla || ' set geom=$1 where gid=$2';
+		execute consulta using geom_snapada,fila.gid;
+     	END LOOP;
+     	CLOSE cur;
+
+	--Servidumbres
+	if tipo_tr_snapar='definitivo' then
+		tabla:= esquema || '.servidumbres';
+	else
+		tabla:= esquema || '.ed_servidumbres';
+	end if;
+	OPEN cur FOR EXECUTE 'SELECT gid,geom FROM ' || tabla || ' WHERE id_trabajo = $1' USING id_tr_snapar;	
+     	LOOP
+		FETCH cur INTO fila;
+		raise notice 'snapando elemento interior gid: %', fila.gid;
+		EXIT WHEN NOT FOUND;
+		geom_snapada:=st_multi(st_snap(fila.geom,nueva_geom_finca,distancia_snap));
+		geom_snapada:=script.comprueba_geom(geom_snapada);
+		raise notice 'geometria snapada';
+		consulta:='update ' || tabla || ' set geom=$1 where gid=$2';
+		execute consulta using geom_snapada,fila.gid;
+     	END LOOP;
+     	CLOSE cur;
+
+
+	--Imagenes
+	if tipo_tr_snapar='definitivo' then
+		tabla:= esquema || '.img_linde';
+	else
+		tabla:= esquema || '.ed_img_linde';
+	end if;
+	OPEN cur FOR EXECUTE 'SELECT gid,geom FROM ' || tabla || ' WHERE id_trabajo = $1' USING id_tr_snapar;	
+     	LOOP
+		FETCH cur INTO fila;
+		raise notice 'snapando imagen gid: %', fila.gid;
+		EXIT WHEN NOT FOUND;
+		geom_snapada:=st_snap(fila.geom,nueva_geom_finca,distancia_snap);
+		geom_snapada:=script.comprueba_geom(geom_snapada);
+		raise notice 'geometria snapada';
+		consulta:='update ' || tabla || ' set geom=$1 where gid=$2';
+		execute consulta using geom_snapada,fila.gid;
+     	END LOOP;
+     	CLOSE cur;
+	return true;
+  END;
+$$ LANGUAGE 'plpgsql';
+
+commit;

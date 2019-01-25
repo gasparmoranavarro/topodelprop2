@@ -1,0 +1,27 @@
+begin;
+CREATE OR REPLACE FUNCTION script.error_area() RETURNS trigger AS $$
+/*
+Autor: Gaspar Mora Navarro. Universidad Politécnica de Valencia.
+
+
+Utiliza las funciones:
+	- script.comprueba_geom
+	- script.comprueba_tama
+	- script.comprueba_overlaps
+	- script.comprueba_gaps
+*/
+DECLARE
+	geom geometry;
+BEGIN
+	--si no se cambian las geometrias no se hace nada.
+	if TG_OP='UPDATE' then
+		if NEW.geom = OLD.geom and NEW.precision_cm = OLD.precision_cm then
+			return NEW;
+		end if;
+	end if;
+	NEW.e_max_area_99:=script.error_area_multipoligono(NEW.geom, NEW.precision_cm/100);
+	return NEW;
+  END;
+$$ LANGUAGE 'plpgsql';
+
+commit;

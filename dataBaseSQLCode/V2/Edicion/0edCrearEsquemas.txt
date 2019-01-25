@@ -1,0 +1,6 @@
+
+create schema ed_comun;
+create schema ed_src25828;
+create schema ed_src25829;
+create schema ed_src25830;
+create schema ed_src25831;

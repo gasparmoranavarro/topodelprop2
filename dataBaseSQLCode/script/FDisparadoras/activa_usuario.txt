@@ -1,0 +1,95 @@
+
+begin;
+
+CREATE OR REPLACE FUNCTION script.activa_usuario() RETURNS trigger AS $$
+	/*
+    	Autor: Gaspar Mora Navarro. Universidad Politécnica de Valencia.
+    Este disparador se ejecuta después de actualizar un usuario en la tabla comun.usuarios.
+    Si se ha cambiado el tipo de usuario o, si se ha activado o desactivado, se actualizan
+    los cambios con los nuevos permisos en el usuario de postgres.
+    Para INSERT o DELETE no es necesario programar nada ya que la aplicación de gestión de usuarios
+    al insertar un usuario en comun.usuarios crea el usuario de postgres y le asigna los permisos,
+    al borrar el usuario de comun.usuarios borra el usuario de postgres.
+
+        Elimina el usuario del grupo en el que estuviese y lo introduce en el grupo tipo_usuario nuevo.
+        Los permisos para cada tipo de usuario son los siguientes:
+            - admin_propiedad: modificar cualquier campo y crear nuevos usuarios.
+            - editor: permiso de escritura en las tablas de edición. Únicamente puede modificar sus
+                propios trabajos, pero puede leer los trabajos completos de los demás editores en las
+                capas de edición. También tiene acceso de lectura a las capas espaciales definitivas.
+            - consultor autorizado: Tiene permiso de lectura de los trabajos completos en las tablas
+                definitivas exclusivamente.
+            - consultor: únicamente puede leer las capas de geometría definitivas. Aquí no hay ningún
+                dato personal.
+        Si activado es "True" (cuidado porque usuario,tipo_usuario y activado deben ser cadenas unicode),
+        elimina del grupo en el que estuviese el usuario y lo introduce en el nuevo grupo especificado en
+        tipo_usuario. Si Si activado es "False" hace una de las siguientes tareas:
+            - Si tipo_usuario="admin_propiedad", "editor" o "consultor_autorizado", lo introduce en el grupo
+                de consultores, con lo que solo puede leer las capas espaciales
+            - Si tipo_usuario="consultor", lo elimina del grupo, perdiendo los privilegios y no podrá
+                realizar ninguna acción ni de lectura ni de escritura.
+        type usuario: string unicode
+        param usuario: nombre del usuario. Es es el valor del campo comun.usuarios.usuario.
+        type tipo_usuario: string unicode
+        param tipo_usuario: Puede ser "admin_propiedad", "editor", "consultor_autorizado" o "consultor".
+        type activado: string unicode
+        param activado: Puede ser "True" o "False".
+        raise exception: Exception con la descripción del error.
+	*/
+
+  DECLARE
+	tipo_usuario varchar;
+	usuario varchar;
+	activado boolean;
+  BEGIN
+
+    usuario:=NEW.usuario;
+    tipo_usuario:=NEW.tipo_usuario;
+    activado:=NEW.activado;
+
+    raise notice 'usuario %',usuario;
+    raise notice 'tipo_usuario %', tipo_usuario;
+    raise notice 'activado %',activado;
+
+    execute 'revoke admin_propiedad from ' || quote_ident(usuario);
+    execute 'revoke editor from ' || quote_ident(usuario);
+    execute 'revoke consultor_autorizado from ' || quote_ident(usuario);
+    execute 'revoke consultor from ' || quote_ident(usuario);
+
+	if tipo_usuario = 'admin_propiedad' then
+		if activado = True then
+            raise notice 'concediendo admin_propiedad';
+			execute 'grant admin_propiedad to ' || quote_ident(usuario);
+		else
+            raise notice 'concediendo consultor a admin_propiedad';
+			execute 'grant consultor to ' || quote_ident(usuario);
+		end if;
+	elsif tipo_usuario='editor' then
+		if activado = True then
+            raise notice 'concediendo editor';
+			execute 'grant editor to ' || quote_ident(usuario);
+		else
+            raise notice 'concediendo consultor a editor';
+			execute 'grant consultor to ' || quote_ident(usuario);
+		end if;
+	elsif tipo_usuario='consultor_autorizado' then
+		if activado = True then
+            raise notice 'concediendo consultor_autorizado';
+            execute 'grant consultor_autorizado to ' || quote_ident(usuario);
+		else
+            raise notice 'concediendo consultor a consultor_autorizado';
+			execute 'grant consultor to ' || quote_ident(usuario);
+		end if;
+	elsif tipo_usuario='consultor' then
+		if activado = True then
+            raise notice 'concediendo consultor a consultor';
+            execute 'grant consultor to ' || quote_ident(usuario);
+		end if;
+    else
+	   raise exception 'El tipo de usuario (%) no existe.',tipo_usuario;
+	end if;
+    return NEW;
+  END;
+$$ LANGUAGE 'plpgsql';
+
+commit;
