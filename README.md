@@ -1,6 +1,6 @@
 TopoDelProp system description
 
-TopoDelProp is a tool for managing geographic data and metadata, to support a legal cadastre. It can be used in any country that uses a projected coordinate system.
+TopoDelProp is a tool for managing geographic data and metadata of topographic delimitations
 
 You can find the justification for the system and program settings and manual document thesis
 
