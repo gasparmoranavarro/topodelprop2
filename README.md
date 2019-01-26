@@ -2,33 +2,24 @@ TopoDelProp system description
 
 TopoDelProp is a tool for managing geographic data and metadata of topographic delimitations
 
-You can find the justification for the system and program settings and manual document thesis
-
-The program fist need, for to work, you install the plugin pyUPVBib containing Python libraries necessary. The system includes:
-
-SQL code for creating database in PostgreSQL + PostGIS in the system of coordinates required.
-Program for user management
-Documented library of general interest to facilitate work with PostGIS programming in Python
-TopoDelProp Plugin that allows viewing and editing data from the database.
 The system maintains five layers of spatial data:
 
-Layer farms: MultiPolygon layer with perimeters defining property
-Boundaries: LineString layer with independent farm boundaries
-Images boundaries: Point-type layer with the images of the singular points of each boundary
-Interior Elements: MultiPolygon layer with relevant items within the property, such as buildings, swimming pools, ...
-Easements: MultiPolygon layer with easements having the farm, such as passing, views, ...
-The database has some automatic procedures that prevent entering geometries are wrong, as boundaries, easements or interior elements outside the perimeter of the farm, or images of boundaries outside the boundary to which they belong.
+	Parcels: MultiPolygon layer with perimeters defining property
+	Boundaries: LineString layer with independent parcel boundaries
+	Boundary images: Point-type layer with the images of the singular points of each boundary
+	Interior Elements: MultiPolygon layer with relevant items within the property, such as buildings, swimming pools, ...
+	Easements: MultiPolygon layer with easements having the farm, such as passing, views, ...
 
-The system requires topographic and legal documents justifying the geometry of a working definition of a farm, as topographical memory, ID cards, or acts of demarcation between adjacent neighbors.
+The database has some automatic procedures that prevent entering topologically wrong geometries, as boundaries, easements or interior elements outside the perimeter of the parcel, or boundary images outside the boundary to which they belong.
 
 For a detailed explanation visit http://riunet.upv.es/handle/10251/321/browse?authority=27239&type=author
 
-The sistem uses: * Qgis 2.x. Will not work in Qgis 3.x * PostgreSQL and PostGIS * Python 2.7
+The sistem uses: Qgis 2.x., PostgreSQL and PostGIS, and Python 2.7
 
 Folder content description:
 
 * databaseSqlCode
-Sql code to create new databases in other SRCs diferent of Spain. It creates tables, relations, field indexes, PL/PGsql and trigger functions. TopoDelProp plugin does not work with a database. Create a database with this code is a very complicate proces. I am working to improve this. I can create your database and send you a database backup, ready for restore in PostGis. If you are interested in this please contact me (gaspar.mora.navarro@gmail.com). 
+Sql code to create new databases in other SRCs diferent of Spain. It creates tables, relations, field indexes, PL/PGsql and trigger functions. TopoDelProp plugin does not work with a database. Create a database with this code is a very complicate process. I am working to improve this. I can create your database and send you a database backup, ready for restore in PostGis. If you are interested in this please contact me (gaspar.mora.navarro@gmail.com). 
 
 * pyUPVBibQgis218Plugin
 Plugin to facilitate the PostgreSQL operations. Necessary to install it in order TopoDelProp plugin works. It contains classes and methods to connect, insert, delete and update operations. There is an HTML to show the classes documentation.
@@ -38,7 +29,6 @@ Plugin to manage the geographic data and metadata of topographic properties deli
 
 * userManagement
 A Python 2.7 utility to manage TopoDelProp users. It allows create, delete enable and disable users.
-Videos
 
 Links to videos in a poor English explaining the TopoDelProp tool
 
